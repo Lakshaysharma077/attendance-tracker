@@ -110,35 +110,10 @@ export function AuthForm() {
         router.push('/');
       }
     } catch (error: any) {
-      let errorMessage = 'An unexpected error occurred.';
-      switch (error.code) {
-        case 'auth/user-not-found':
-          errorMessage = 'No user found with this email.';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Incorrect password. Please try again.';
-          break;
-        case 'auth/email-already-in-use':
-          errorMessage = 'This email is already registered. Please log in.';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Please enter a valid email address.';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Password should be at least 6 characters.';
-          break;
-        case 'auth/configuration-not-found':
-          errorMessage =
-            'Authentication provider not enabled. Please enable Email/Password and Google sign-in in your Firebase console.';
-          break;
-        default:
-          errorMessage = error.message;
-          break;
-      }
       toast({
         variant: 'destructive',
         title: 'Authentication Failed',
-        description: errorMessage,
+        description: error.message,
       });
     } finally {
       setIsLoading(false);
@@ -182,27 +157,10 @@ export function AuthForm() {
       }
       router.push('/');
     } catch (error: any) {
-      let errorMessage = 'An unexpected error occurred.';
-      switch (error.code) {
-        case 'auth/popup-closed-by-user':
-          errorMessage = 'Sign-in process was cancelled.';
-          break;
-        case 'auth/account-exists-with-different-credential':
-          errorMessage =
-            'An account already exists with the same email address but different sign-in credentials.';
-          break;
-        case 'auth/configuration-not-found':
-          errorMessage =
-            'Authentication provider not enabled. Please enable Email/Password and Google sign-in in your Firebase console.';
-          break;
-        default:
-          errorMessage = error.message;
-          break;
-      }
       toast({
         variant: 'destructive',
         title: 'Google Sign-In Failed',
-        description: errorMessage,
+        description: error.message,
       });
     } finally {
       setIsGoogleLoading(false);

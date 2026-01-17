@@ -65,8 +65,8 @@
   },
   "auth": {
     "providers": [
-      "email-password",
-      "google.com"
+      "google.com",
+      "email-password"
     ]
   },
   "firestore": {
