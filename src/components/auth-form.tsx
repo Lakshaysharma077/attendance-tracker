@@ -1,7 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from 'firebase/auth';
 import { useAuth, useFirestore } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -12,6 +17,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
@@ -33,60 +46,94 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 );
 
 export function AuthForm() {
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('signin');
+
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    if (!auth || !firestore) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Authentication service not available. Please try again later.',
+  const handleAuthSuccess = async (user: any) => {
+    if (!firestore) return;
+    const userDocRef = doc(firestore, 'users', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      await setDoc(userDocRef, {
+        email: user.email,
+        displayName: user.displayName || user.email,
+        photoURL: user.photoURL || '',
       });
-      setIsGoogleLoading(false);
+      toast({
+        title: 'Account Created',
+        description: 'Welcome! Your account has been successfully created.',
+      });
+    } else {
+      toast({
+        title: 'Success',
+        description: 'Logged in successfully.',
+      });
+    }
+    router.push('/');
+  };
+
+  const handleAuthError = (error: any) => {
+    const errorMessage =
+      error.code === 'auth/configuration-not-found'
+        ? 'The sign-in provider is not enabled. Please contact support.'
+        : error.message;
+    toast({
+      variant: 'destructive',
+      title: 'Authentication Failed',
+      description: errorMessage,
+    });
+  };
+
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    if (!auth) {
+      handleAuthError({ message: 'Authentication service not available.' });
+      setIsLoading(false);
+      return;
+    }
+    try {
+      if (activeTab === 'signup') {
+        const result = await createUserWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+        await handleAuthSuccess(result.user);
+      } else {
+        const result = await signInWithEmailAndPassword(auth, email, password);
+        await handleAuthSuccess(result.user);
+      }
+    } catch (error: any) {
+      handleAuthError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    if (!auth) {
+      handleAuthError({ message: 'Authentication service not available.' });
+      setIsLoading(false);
       return;
     }
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          email: user.email,
-          displayName: user.displayName,
-          photoURL: user.photoURL,
-        });
-        toast({
-          title: 'Account Created',
-          description: 'Welcome! Your account has been created with Google.',
-        });
-      } else {
-        toast({
-          title: 'Success',
-          description: 'Logged in successfully with Google.',
-        });
-      }
-      router.push('/');
+      await handleAuthSuccess(result.user);
     } catch (error: any) {
-       const errorMessage =
-        error.code === 'auth/configuration-not-found'
-          ? 'The Google sign-in provider is not enabled. Please contact support.'
-          : error.message;
-      toast({
-        variant: 'destructive',
-        title: 'Google Sign-In Failed',
-        description: errorMessage,
-      });
+      handleAuthError(error);
     } finally {
-      setIsGoogleLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -95,24 +142,115 @@ export function AuthForm() {
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
         <CardDescription>
-          Sign in with your Google account to continue.
+          Sign in or create an account to track your attendance.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-4">
-          <Button
-            variant="outline"
-            onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || !auth}
-          >
-            {isGoogleLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <GoogleIcon className="mr-2" />
-            )}
-            Continue with Google
-          </Button>
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="signin">Sign In</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
+          <TabsContent value="signin">
+            <form onSubmit={handleEmailAuth}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-signin">Email</Label>
+                  <Input
+                    id="email-signin"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-signin">Password</Label>
+                  <Input
+                    id="password-signin"
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Sign In
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+          <TabsContent value="signup">
+            <form onSubmit={handleEmailAuth}>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email-signup">Email</Label>
+                  <Input
+                    id="email-signup"
+                    type="email"
+                    placeholder="m@example.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password-signup">Password</Label>
+                  <Input
+                    id="password-signup"
+                    type="password"
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Create Account
+                </Button>
+              </div>
+            </form>
+          </TabsContent>
+        </Tabs>
+
+        <div className="relative my-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              Or continue with
+            </span>
+          </div>
         </div>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={handleGoogleSignIn}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <GoogleIcon className="mr-2" />
+          )}
+          Google
+        </Button>
       </CardContent>
     </Card>
   );
