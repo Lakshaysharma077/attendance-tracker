@@ -1,11 +1,9 @@
 'use server';
 
 /**
- * @fileOverview Calculates the number of classes a student can miss without falling below the minimum attendance requirement.
- *
- * - calculateClassesMissed - A function that calculates the number of missable classes.
- * - CalculateClassesMissedInput - The input type for the calculateClassesMissed function.
- * - CalculateClassesMissedOutput - The return type for the calculateClassesMissed function.
+ * @fileOverview Calculates attendance scenarios based on a student's current status,
+ * determining either how many classes can be missed or how many must be attended
+ * to meet a specific percentage requirement.
  */
 
 import {ai} from '@/ai/genkit';
@@ -14,13 +12,10 @@ import {z} from 'genkit';
 const CalculateClassesMissedInputSchema = z.object({
   totalClasses: z
     .number()
-    .describe('The total number of classes for the subject.'),
+    .describe('The total number of classes conducted so far.'),
   presentClasses: z
     .number()
     .describe('The number of classes the student has attended.'),
-  absentClasses: z
-    .number()
-    .describe('The number of classes the student has missed.'),
   attendanceRequirement: z
     .number()
     .min(1)
@@ -32,11 +27,8 @@ export type CalculateClassesMissedInput = z.infer<
 >;
 
 const CalculateClassesMissedOutputSchema = z.object({
-  classesMissable: z
-    .number()
-    .describe(
-      'The number of future classes the student can miss without falling below the minimum attendance requirement. A negative number means the requirement is no longer reachable.'
-    ),
+  status: z.enum(['success', 'warning', 'danger', 'info']),
+  message: z.string(),
 });
 export type CalculateClassesMissedOutput = z.infer<
   typeof CalculateClassesMissedOutputSchema
@@ -55,30 +47,50 @@ const calculateClassesMissedFlow = ai.defineFlow(
     outputSchema: CalculateClassesMissedOutputSchema,
   },
   async input => {
-    const {
-      totalClasses,
-      presentClasses,
-      absentClasses,
-      attendanceRequirement,
-    } = input;
-
-    if (totalClasses === 0) {
-      return {
-        classesMissable: 0,
-      };
-    }
-
+    const { totalClasses, presentClasses, attendanceRequirement } = input;
     const requirement = attendanceRequirement / 100;
 
-    // Maximum number of absences allowed over the whole semester
-    const maxAbsentAllowed = Math.floor(totalClasses * (1 - requirement));
+    if (totalClasses === 0) {
+      return { status: 'info', message: 'Mark attendance to see insights.' };
+    }
 
-    // How many more classes can be missed from now until the end.
-    // This can be negative if the user has already missed too many classes.
-    const classesMissable = maxAbsentAllowed - absentClasses;
+    const currentPercentage = presentClasses / totalClasses;
 
-    return {
-      classesMissable,
-    };
+    if (currentPercentage >= requirement) {
+      // CASE 1: Attendance is >= requirement. Calculate how many classes can be missed.
+      const canMiss = Math.floor(presentClasses / requirement - totalClasses);
+      const plural = canMiss !== 1 ? 'es' : '';
+
+      if (canMiss > 0) {
+        return {
+          status: canMiss <= 2 ? 'warning' : 'success',
+          message: `You can miss ${canMiss} more class${plural}.`,
+        };
+      } else {
+        return {
+          status: 'warning',
+          message: 'You cannot miss any more classes to be safe.',
+        };
+      }
+    } else {
+      // CASE 2: Attendance is < requirement. Calculate how many classes must be attended.
+      const mustAttend = Math.ceil(
+        (requirement * totalClasses - presentClasses) / (1 - requirement)
+      );
+      const plural = mustAttend !== 1 ? 'es' : '';
+
+      if (mustAttend > 0) {
+        return {
+          status: 'danger',
+          message: `You need to attend the next ${mustAttend} class${plural}.`,
+        };
+      } else {
+        // Fallback for floating point issues near the threshold
+        return {
+          status: 'danger',
+          message: `You need to attend the next class to reach ${attendanceRequirement}%.`,
+        };
+      }
+    }
   }
 );

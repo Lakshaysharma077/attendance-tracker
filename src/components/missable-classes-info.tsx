@@ -14,54 +14,27 @@ type Props = {
 export function MissableClassesInfo({ subject }: Props) {
   const [result, setResult] = useState<{
     message: string;
-    type: 'info' | 'success' | 'warning';
+    type: 'info' | 'success' | 'warning' | 'danger';
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const {
     totalClasses,
     present: presentClasses,
-    absent: absentClasses,
     requirement: attendanceRequirement,
   } = subject;
 
   useEffect(() => {
     async function getInfo() {
-      if (presentClasses + absentClasses === 0) {
-        setResult({
-          message: 'Mark attendance to see insights.',
-          type: 'info',
-        });
-        setIsLoading(false);
-        return;
-      }
       setIsLoading(true);
       try {
         const output = await calculateClassesMissed({
           totalClasses,
           presentClasses,
-          absentClasses,
           attendanceRequirement,
         });
 
-        const { classesMissable } = output;
-
-        if (classesMissable < 0) {
-          setResult({
-            message: `Attendance requirement is no longer reachable.`,
-            type: 'warning',
-          });
-        } else if (classesMissable === 0) {
-          setResult({
-            message: `You cannot miss any more classes to be safe.`,
-            type: 'warning',
-          });
-        } else {
-          setResult({
-            message: `You can miss ${classesMissable} more class(es).`,
-            type: classesMissable <= 2 ? 'warning' : 'success',
-          });
-        }
+        setResult({ message: output.message, type: output.status });
       } catch (error) {
         console.error('AI calculation failed:', error);
         setResult({
@@ -73,12 +46,7 @@ export function MissableClassesInfo({ subject }: Props) {
       }
     }
     getInfo();
-  }, [
-    totalClasses,
-    presentClasses,
-    absentClasses,
-    attendanceRequirement,
-  ]);
+  }, [totalClasses, presentClasses, attendanceRequirement]);
 
   if (isLoading) {
     return <Skeleton className="h-6 w-3/4" />;
@@ -89,12 +57,13 @@ export function MissableClassesInfo({ subject }: Props) {
   const Icon =
     result.type === 'success'
       ? CheckCircle
-      : result.type === 'warning'
+      : result.type === 'warning' || result.type === 'danger'
       ? AlertCircle
       : Info;
   const colorClass = cn({
     'text-chart-2': result.type === 'success',
     'text-chart-4': result.type === 'warning',
+    'text-destructive': result.type === 'danger',
     'text-muted-foreground': result.type === 'info',
   });
 
