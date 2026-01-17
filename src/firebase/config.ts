@@ -5,10 +5,10 @@
 // variable to specify which project's config to use.
 // IMPORTANT: Replace the placeholder values with your actual Firebase project configuration.
 export const firebaseConfig = {
-  apiKey: 'REPLACE_WITH_YOUR_API_KEY',
-  authDomain: 'REPLACE_WITH_YOUR_AUTH_DOMAIN',
-  projectId: 'REPLACE_WITH_YOUR_PROJECT_ID',
-  storageBucket: 'REPLACE_WITH_YOUR_STORAGE_BUCKET',
-  messagingSenderId: 'REPLACE_WITH_YOUR_MESSAGING_SENDER_ID',
-  appId: 'REPLACE_WITH_YOUR_APP_ID',
+  apiKey: "AIzaSyCjCy2tLCBNdqzgcryVMC6_1x73WCtyAzM",
+  authDomain: "studio-5533261207-f5012.firebaseapp.com",
+  projectId: "studio-5533261207-f5012",
+  storageBucket: "studio-5533261207-f5012.appspot.com",
+  messagingSenderId: "988146968348",
+  appId: "1:988146968348:web:7bc095df650a77193cbcd9",
 };
