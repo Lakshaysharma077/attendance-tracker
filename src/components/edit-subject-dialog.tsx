@@ -33,6 +33,8 @@ const formSchema = z.object({
     .number({ invalid_type_error: 'Must be a number.' })
     .min(1, { message: 'Must be at least 1.' })
     .max(100, { message: 'Cannot exceed 100.' }),
+  present: z.coerce.number().min(0, { message: 'Cannot be negative.' }),
+  absent: z.coerce.number().min(0, { message: 'Cannot be negative.' }),
 });
 
 type EditSubjectDialogProps = {
@@ -55,6 +57,8 @@ export function EditSubjectDialog({
       teacher: subject.teacher,
       totalClasses: subject.totalClasses,
       requirement: subject.requirement,
+      present: subject.present,
+      absent: subject.absent,
     },
   });
 
@@ -65,6 +69,8 @@ export function EditSubjectDialog({
         teacher: subject.teacher,
         totalClasses: subject.totalClasses,
         requirement: subject.requirement,
+        present: subject.present,
+        absent: subject.absent,
       });
     }
   }, [isOpen, subject, form]);
@@ -144,6 +150,34 @@ export function EditSubjectDialog({
                 </FormItem>
               )}
             />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="present"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Classes Attended</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="absent"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Classes Missed</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <DialogFooter>
               <Button
                 type="submit"
