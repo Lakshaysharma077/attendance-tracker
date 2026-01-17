@@ -1,17 +1,76 @@
+/**
+ * This ruleset enforces a strict user-ownership security model for an attendance tracking application.
+ *
+ * Core Philosophy:
+ * All user-generated data is private. A user can only access, modify, or delete data
+ * that exists within their own user-specific data tree. There is no concept of public or
+ * shared data in this model.
+ *
+ * Data Structure:
+ * All application data is nested under a user-specific path: `/users/{userId}`.
+ * For example, a user's subjects are stored at `/users/{userId}/subjects/{subjectId}`.
+ * This structure makes ownership explicit and allows for simple, performant security rules.
+ *
+ * Key Security Decisions:
+ * - Default Deny: Access is denied by default. All permissions must be explicitly granted.
+ * - No User Listing: It is not possible to list documents in the top-level `/users` collection.
+ * - Path-Based Authorization: Ownership is determined by matching the authenticated user's ID
+ *   (`request.auth.uid`) with the `userId` wildcard in the document path. This avoids costly
+ *   `get()` calls to other documents for authorization checks.
+ * - Prototyping Flexibility: The rules strictly enforce *who* can access data but do not
+ *   enforce the *shape* of that data. This allows for rapid iteration on the application's
+ *   data model without needing to update security rules for every schema change.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read and write their own profile
-    match /users/{userId} {
-      allow read, update, delete: if request.auth.uid == userId;
-      allow create: if request.auth.uid == userId;
+
+    // Helper functions for readability and reusability.
+
+    /**
+     * Checks if the request is from an authenticated user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
     }
 
-    // Users can manage their own subjects
+    /**
+     * Checks if the requesting user's UID matches the document owner's UID from the path.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document.
+     * CRITICAL: Used for update and delete to prevent modifying non-existent data.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Rules for a user's private 'subjects' collection.
+     * @path        /users/{userId}/subjects/{subjectId}
+     * @allow       (create): An authenticated user (UID 'user_abc') can create their own subject at '/users/user_abc/subjects/math101'.
+     * @deny        (get): A user ('user_xyz') cannot read a subject belonging to another user at '/users/user_abc/subjects/math101'.
+     * @principle   Restricts all access to the document owner, based on the `userId` in the path.
+     */
     match /users/{userId}/subjects/{subjectId} {
-      // Allow full access to the user on their own subjects.
-      allow read, create, update, delete: if request.auth.uid == userId;
+      // READ: Users can get and list their own subjects.
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+
+      // CREATE: A user can create a subject in their own collection.
+      // The incoming document's 'id' must match the document's ID in the path for data integrity.
+      allow create: if isOwner(userId) && request.resource.data.id == subjectId;
+
+      // UPDATE: The owner can update their subject.
+      // The document's 'id' field is immutable and cannot be changed after creation.
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+
+      // DELETE: The owner can delete their own subject.
+      allow delete: if isExistingOwner(userId);
     }
   }
 }

@@ -1,86 +1,83 @@
 {
   "entities": {
-    "UserProfile": {
-      "title": "User Profile",
-      "description": "Represents a user's profile.",
-      "type": "object",
-      "properties": {
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The user's email address."
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The user's display name."
-        },
-        "photoURL": {
-          "type": "string",
-          "format": "uri",
-          "description": "URL of the user's profile picture."
-        }
-      },
-      "required": [
-        "email"
-      ]
-    },
     "Subject": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Subject",
-      "description": "Represents a course or subject the user is tracking.",
       "type": "object",
+      "description": "Represents a subject or course that the user is tracking attendance for.",
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Subject entity."
+        },
         "name": {
           "type": "string",
-          "description": "The name of the subject."
+          "description": "The name of the subject or course."
         },
-        "teacher": {
-          "type": "string",
-          "description": "The name of the teacher."
-        },
-        "requirement": {
+        "attendanceRequirement": {
           "type": "number",
-          "description": "The attendance requirement as a percentage."
+          "description": "The minimum attendance percentage required for the subject (e.g., 75 for 75%).",
+          "format": "number"
+        },
+        "teacherName": {
+          "type": "string",
+          "description": "The name of the teacher for the subject (optional)."
         },
         "totalClasses": {
           "type": "number",
-          "description": "Total number of classes in the semester."
+          "description": "The total number of classes held for the subject.",
+          "format": "number"
         },
-        "present": {
+        "presentCount": {
           "type": "number",
-          "description": "Number of classes attended."
+          "description": "The number of classes the user has attended.",
+          "format": "number"
         },
-        "absent": {
+        "absentCount": {
           "type": "number",
-          "description": "Number of classes missed."
+          "description": "The number of classes the user has missed.",
+          "format": "number"
         }
       },
       "required": [
+        "id",
         "name",
-        "requirement",
+        "attendanceRequirement",
         "totalClasses",
-        "present",
-        "absent"
+        "presentCount",
+        "absentCount"
       ]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "google.com"
+      "anonymous"
     ]
   },
   "firestore": {
-    "/users/{userId}": {
-      "schema": {
-        "$ref": "#/entities/UserProfile"
-      },
-      "description": "Stores user profile information."
-    },
-    "/users/{userId}/subjects/{subjectId}": {
-      "schema": {
-        "$ref": "#/entities/Subject"
-      },
-      "description": "Stores subjects for a specific user."
-    }
+    "structure": [
+      {
+        "path": "/users/{userId}/subjects/{subjectId}",
+        "definition": {
+          "entityName": "Subject",
+          "schema": {
+            "$ref": "#/backend/entities/Subject"
+          },
+          "description": "Stores subject data for each user. The userId path segment indicates the owner. The subjectId is the unique identifier for each subject. Data access is restricted to the user who owns the subject.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "subjectId",
+              "description": "The unique identifier of the subject."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The data structure prioritizes simplicity and security. Subjects are stored under each user's document to ensure straightforward ownership and prevent unauthorized access.  This design avoids complex authorization logic in the rules by making ownership explicit through the path. It also facilitates listing subjects specific to a user without exposing other users' data, fulfilling the QAPs requirement. The structure achieves Authorization Independence since access control is solely based on the user ID in the path (`/users/{userId}/subjects/{subjectId}`), removing the need for `get()` calls in security rules."
   }
 }
