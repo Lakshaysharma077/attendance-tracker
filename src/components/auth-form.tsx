@@ -47,6 +47,8 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('signin');
@@ -81,10 +83,11 @@ export function AuthForm() {
   };
 
   const handleAuthError = (error: any) => {
-    const errorMessage =
-      error.code === 'auth/configuration-not-found'
-        ? 'The sign-in provider is not enabled. Please contact support.'
-        : error.message;
+    let errorMessage = error.message;
+    if (error.code === 'auth/configuration-not-found') {
+      errorMessage =
+        'The sign-in provider is not enabled in your Firebase project. Please contact support.';
+    }
     toast({
       variant: 'destructive',
       title: 'Authentication Failed',
@@ -94,9 +97,11 @@ export function AuthForm() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsEmailLoading(true);
     setIsLoading(true);
     if (!auth) {
       handleAuthError({ message: 'Authentication service not available.' });
+      setIsEmailLoading(false);
       setIsLoading(false);
       return;
     }
@@ -115,14 +120,17 @@ export function AuthForm() {
     } catch (error: any) {
       handleAuthError(error);
     } finally {
+      setIsEmailLoading(false);
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setIsGoogleLoading(true);
     setIsLoading(true);
     if (!auth) {
       handleAuthError({ message: 'Authentication service not available.' });
+      setIsGoogleLoading(false);
       setIsLoading(false);
       return;
     }
@@ -133,6 +141,7 @@ export function AuthForm() {
     } catch (error: any) {
       handleAuthError(error);
     } finally {
+      setIsGoogleLoading(false);
       setIsLoading(false);
     }
   };
@@ -181,8 +190,12 @@ export function AuthForm() {
                     disabled={isLoading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && (
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isEmailLoading || isLoading}
+                >
+                  {isEmailLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Sign In
@@ -216,8 +229,12 @@ export function AuthForm() {
                     disabled={isLoading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading && (
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={isEmailLoading || isLoading}
+                >
+                  {isEmailLoading && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Create Account
@@ -242,9 +259,9 @@ export function AuthForm() {
           variant="outline"
           className="w-full"
           onClick={handleGoogleSignIn}
-          disabled={isLoading}
+          disabled={isGoogleLoading || isLoading}
         >
-          {isLoading ? (
+          {isGoogleLoading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           ) : (
             <GoogleIcon className="mr-2" />
