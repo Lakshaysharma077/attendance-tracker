@@ -50,6 +50,22 @@ service cloud.firestore {
     }
 
     /**
+     * @description Rules for a user's own profile document.
+     * @path        /users/{userId}
+     * @allow       (create): A user can create their own profile document.
+     * @allow       (get, update): A user can read or update their own profile.
+     * @deny        (get, update, delete): A user cannot access another user's profile.
+     */
+    match /users/{userId} {
+      allow get, update: if isOwner(userId);
+      // A user can create their own profile document, ensuring the UID in the doc matches.
+      allow create: if isOwner(userId) && request.resource.data.uid == userId;
+      // Deleting user profile documents is disallowed for data integrity.
+      allow delete: if false;
+    }
+
+
+    /**
      * @description Rules for a user's private 'subjects' collection.
      * @path        /users/{userId}/subjects/{subjectId}
      * @allow       (create): An authenticated user (UID 'user_abc') can create their own subject at '/users/user_abc/subjects/math101'.

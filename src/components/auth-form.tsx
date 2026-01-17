@@ -7,7 +7,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -27,7 +27,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -64,11 +64,14 @@ export function AuthForm() {
     const userDoc = await getDoc(userDocRef);
 
     if (!userDoc.exists()) {
-      await setDoc(userDocRef, {
+      const newUserProfile = {
+        uid: user.uid,
         email: user.email,
-        displayName: user.displayName || user.email,
+        displayName: user.displayName || user.email.split('@')[0],
         photoURL: user.photoURL || '',
-      });
+      };
+      // Use non-blocking write for better UX and error handling
+      setDocumentNonBlocking(userDocRef, newUserProfile, { merge: false });
       toast({
         title: 'Account Created',
         description: 'Welcome! Your account has been successfully created.',

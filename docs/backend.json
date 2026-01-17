@@ -1,5 +1,30 @@
 {
   "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User Profile",
+      "type": "object",
+      "description": "Represents a user's profile information.",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The user's unique ID."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address."
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "URL of the user's profile picture."
+        }
+      },
+      "required": ["uid", "email"]
+    },
     "Subject": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Subject",
@@ -52,11 +77,28 @@
   "auth": {
     "providers": [
       "password",
-      "anonymous"
+      "anonymous",
+      "google.com"
     ]
   },
   "firestore": {
     "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores user profile information. The userId path segment is the user's UID.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user (matches auth UID)."
+            }
+          ]
+        }
+      },
       {
         "path": "/users/{userId}/subjects/{subjectId}",
         "definition": {
@@ -78,6 +120,6 @@
         }
       }
     ],
-    "reasoning": "The data structure prioritizes simplicity and security. Subjects are stored under each user's document to ensure straightforward ownership and prevent unauthorized access.  This design avoids complex authorization logic in the rules by making ownership explicit through the path. It also facilitates listing subjects specific to a user without exposing other users' data, fulfilling the QAPs requirement. The structure achieves Authorization Independence since access control is solely based on the user ID in the path (`/users/{userId}/subjects/{subjectId}`), removing the need for `get()` calls in security rules."
+    "reasoning": "The data structure prioritizes simplicity and security. User profiles are stored at `/users/{userId}`. Subjects are stored under each user's document to ensure straightforward ownership and prevent unauthorized access. This design avoids complex authorization logic in the rules by making ownership explicit through the path. It also facilitates listing subjects specific to a user without exposing other users' data."
   }
 }

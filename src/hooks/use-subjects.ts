@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import type { Subject } from '@/lib/types';
 import {
   collection,
@@ -10,21 +10,23 @@ import {
   doc,
   increment,
 } from 'firebase/firestore';
-import { useFirestore, useCollection } from '@/firebase';
+import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 export function useSubjects(userId?: string) {
   const firestore = useFirestore();
 
-  const subjectsCollection = useMemo(() => {
+  const subjectsCollection = useMemoFirebase(() => {
     if (!firestore || !userId) return null;
     return collection(firestore, 'users', userId, 'subjects');
   }, [firestore, userId]);
 
-  const { data: subjects, isLoading, error } = useCollection<Subject>(
-    subjectsCollection
-  );
+  const {
+    data: subjects,
+    isLoading,
+    error,
+  } = useCollection<Subject>(subjectsCollection);
 
   const addSubject = useCallback(
     (subject: Omit<Subject, 'id' | 'present' | 'absent'>) => {
