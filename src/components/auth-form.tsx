@@ -226,7 +226,7 @@ export function AuthForm() {
           <Button
             variant="outline"
             onClick={handleGoogleSignIn}
-            disabled={isGoogleLoading || isLoading}
+            disabled={isGoogleLoading || isLoading || !auth}
           >
             {isGoogleLoading ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -301,7 +301,7 @@ export function AuthForm() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading || isGoogleLoading}
+                disabled={isLoading || isGoogleLoading || !auth}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isLogin ? 'Log In' : 'Sign Up'}

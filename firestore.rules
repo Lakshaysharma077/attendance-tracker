@@ -10,6 +10,7 @@ service cloud.firestore {
 
     // Users can manage their own subjects
     match /users/{userId}/subjects/{subjectId} {
+      // Allow full access to the user on their own subjects.
       allow read, create, update, delete: if request.auth.uid == userId;
     }
   }
