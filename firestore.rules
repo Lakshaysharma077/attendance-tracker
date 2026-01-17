@@ -5,7 +5,7 @@ service cloud.firestore {
     // Users can only read and write their own profile
     match /users/{userId} {
       allow read, update, delete: if request.auth.uid == userId;
-      allow create: if request.auth.uid != null;
+      allow create: if request.auth.uid == userId;
     }
 
     // Users can manage their own subjects

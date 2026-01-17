@@ -5,28 +5,33 @@ import { calculateClassesMissed } from '@/ai/flows/calculate-classes-missed';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Subject } from '@/lib/types';
 
 type Props = {
-  totalClasses: number;
-  presentClasses: number;
-  attendanceRequirement: number;
+  subject: Subject;
 };
 
-export function MissableClassesInfo({
-  totalClasses,
-  presentClasses,
-  attendanceRequirement,
-}: Props) {
+export function MissableClassesInfo({ subject }: Props) {
   const [result, setResult] = useState<{
     message: string;
     type: 'info' | 'success' | 'warning';
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const {
+    totalClasses,
+    present: presentClasses,
+    absent: absentClasses,
+    requirement: attendanceRequirement,
+  } = subject;
+
   useEffect(() => {
     async function getInfo() {
-      if (totalClasses === 0) {
-        setResult({ message: 'Mark attendance to see insights.', type: 'info' });
+      if (presentClasses + absentClasses === 0) {
+        setResult({
+          message: 'Mark attendance to see insights.',
+          type: 'info',
+        });
         setIsLoading(false);
         return;
       }
@@ -35,14 +40,24 @@ export function MissableClassesInfo({
         const output = await calculateClassesMissed({
           totalClasses,
           presentClasses,
+          absentClasses,
           attendanceRequirement,
         });
         if (output.isBelowRequirement) {
           if (output.classesNeededToAttend > 0) {
-            setResult({
-              message: `Attend the next ${output.classesNeededToAttend} classes to be safe.`,
-              type: 'warning',
-            });
+            const remainingClasses =
+              totalClasses - (presentClasses + absentClasses);
+            if (output.classesNeededToAttend > remainingClasses) {
+              setResult({
+                message: `Attendance requirement is no longer reachable.`,
+                type: 'warning',
+              });
+            } else {
+              setResult({
+                message: `Attend the next ${output.classesNeededToAttend} classes to be safe.`,
+                type: 'warning',
+              });
+            }
           } else {
             setResult({
               message: `You are below the requirement.`,
@@ -66,7 +81,12 @@ export function MissableClassesInfo({
       }
     }
     getInfo();
-  }, [totalClasses, presentClasses, attendanceRequirement]);
+  }, [
+    totalClasses,
+    presentClasses,
+    absentClasses,
+    attendanceRequirement,
+  ]);
 
   if (isLoading) {
     return <Skeleton className="h-6 w-3/4" />;

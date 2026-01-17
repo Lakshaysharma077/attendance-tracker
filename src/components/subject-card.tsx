@@ -38,7 +38,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Percent,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -180,11 +179,7 @@ export function SubjectCard({
           </div>
         </CardContent>
         <CardFooter>
-          <MissableClassesInfo
-            totalClasses={total}
-            presentClasses={subject.present}
-            attendanceRequirement={subject.requirement}
-          />
+          <MissableClassesInfo subject={subject} />
         </CardFooter>
       </Card>
       <EditSubjectDialog

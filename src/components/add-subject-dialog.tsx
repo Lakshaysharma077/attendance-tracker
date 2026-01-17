@@ -27,6 +27,7 @@ import type { Subject } from '@/lib/types';
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Subject name cannot be empty.' }),
   teacher: z.string().optional(),
+  totalClasses: z.coerce.number().min(1, { message: 'Must be at least 1.' }),
   requirement: z.coerce
     .number({ invalid_type_error: 'Must be a number.' })
     .min(1, { message: 'Must be at least 1.' })
@@ -36,7 +37,9 @@ const formSchema = z.object({
 type AddSubjectDialogProps = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  onAddSubject: (subject: Omit<Subject, 'id' | 'present' | 'absent'>) => void;
+  onAddSubject: (
+    subject: Omit<Subject, 'id' | 'present' | 'absent'>
+  ) => void;
 };
 
 export function AddSubjectDialog({
@@ -49,6 +52,7 @@ export function AddSubjectDialog({
     defaultValues: {
       name: '',
       teacher: '',
+      totalClasses: 40,
       requirement: 75,
     },
   });
@@ -58,6 +62,7 @@ export function AddSubjectDialog({
       name: values.name,
       teacher: values.teacher || '',
       requirement: values.requirement,
+      totalClasses: values.totalClasses,
     });
     form.reset();
     setIsOpen(false);
@@ -98,6 +103,19 @@ export function AddSubjectDialog({
                   <FormLabel>Teacher Name (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Prof. Sharma" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="totalClasses"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Classes</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

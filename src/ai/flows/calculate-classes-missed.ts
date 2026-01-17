@@ -12,15 +12,24 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const CalculateClassesMissedInputSchema = z.object({
-  totalClasses: z.number().describe('The total number of classes for the subject.'),
-  presentClasses: z.number().describe('The number of classes the student has attended.'),
+  totalClasses: z
+    .number()
+    .describe('The total number of classes for the subject.'),
+  presentClasses: z
+    .number()
+    .describe('The number of classes the student has attended.'),
+  absentClasses: z
+    .number()
+    .describe('The number of classes the student has missed.'),
   attendanceRequirement: z
     .number()
     .min(1)
     .max(100)
     .describe('The minimum attendance requirement (percentage).'),
 });
-export type CalculateClassesMissedInput = z.infer<typeof CalculateClassesMissedInputSchema>;
+export type CalculateClassesMissedInput = z.infer<
+  typeof CalculateClassesMissedInputSchema
+>;
 
 const CalculateClassesMissedOutputSchema = z.object({
   classesMissable: z
@@ -39,36 +48,15 @@ const CalculateClassesMissedOutputSchema = z.object({
       'Whether the student is below the attendance requirement already, based on presentClasses, totalClasses, and attendanceRequirement.'
     ),
 });
-export type CalculateClassesMissedOutput = z.infer<typeof CalculateClassesMissedOutputSchema>;
+export type CalculateClassesMissedOutput = z.infer<
+  typeof CalculateClassesMissedOutputSchema
+>;
 
 export async function calculateClassesMissed(
   input: CalculateClassesMissedInput
 ): Promise<CalculateClassesMissedOutput> {
   return calculateClassesMissedFlow(input);
 }
-
-const calculateClassesMissedPrompt = ai.definePrompt({
-  name: 'calculateClassesMissedPrompt',
-  input: {schema: CalculateClassesMissedInputSchema},
-  output: {schema: CalculateClassesMissedOutputSchema},
-  prompt: `You are a helpful assistant for college students to keep track of attendance.
-
-You will receive the total number of classes, the number of classes the student has attended, and the minimum attendance requirement for a subject.
-
-Calculate how many classes the student can miss without falling below the minimum attendance requirement. Also calculate how many classes the student needs to attend to reach the minimum attendance requirement if they are below it. Return a warning if the student is already below the requirement.
-
-Total Classes: {{{totalClasses}}}
-Present Classes: {{{presentClasses}}}
-Attendance Requirement: {{{attendanceRequirement}}}%
-
-Consider the following:
-- The number of classes that the student can miss should be a non-negative integer.
-- If the student is already below the minimum attendance requirement, the number of classes that they can miss should be 0.
-- If the student is already below the minimum attendance requirement, calculate how many classes the student needs to attend to reach the requirement. The result should be a non-negative integer.
-
-
-JSON Output:`, // No Handlebars in JSON
-});
 
 const calculateClassesMissedFlow = ai.defineFlow(
   {
@@ -77,46 +65,47 @@ const calculateClassesMissedFlow = ai.defineFlow(
     outputSchema: CalculateClassesMissedOutputSchema,
   },
   async input => {
-    const attendancePercentage = (input.presentClasses / input.totalClasses) * 100;
-    const isBelowRequirement = attendancePercentage < input.attendanceRequirement;
-    let classesMissable = 0;
+    const {
+      totalClasses,
+      presentClasses,
+      absentClasses,
+      attendanceRequirement,
+    } = input;
+
+    if (totalClasses === 0) {
+      return {
+        classesMissable: 0,
+        classesNeededToAttend: 0,
+        isBelowRequirement: false,
+      };
+    }
+
+    const requirement = attendanceRequirement / 100;
+    const conductedClasses = presentClasses + absentClasses;
+
+    // Attendance based on classes conducted so far
+    const currentAttendance =
+      conductedClasses > 0 ? (presentClasses / conductedClasses) * 100 : 100;
+    const isBelowRequirement = currentAttendance < attendanceRequirement;
+
+    // Max classes that can be missed throughout the semester
+    const maxAbsentAllowed = Math.floor(totalClasses * (1 - requirement));
+
+    // Classes that can still be missed
+    const classesMissable = maxAbsentAllowed - absentClasses;
+
     let classesNeededToAttend = 0;
-
-    if (!isBelowRequirement) {
-      // Calculate max classes missable
-      for (let i = 0; i <= input.totalClasses - input.presentClasses; i++) {
-        const futureTotalClasses = input.totalClasses;
-        const futurePresentClasses = input.presentClasses;
-
-        if (
-          (futurePresentClasses / futureTotalClasses) * 100 >= input.attendanceRequirement &&
-          (futurePresentClasses - i >= 0) &&
-          ((futurePresentClasses - i) / futureTotalClasses) * 100 >= input.attendanceRequirement
-        ) {
-          classesMissable = i;
-        }
-      }
-    } else {
-      // Calculate min classes needed to attend
-      for (let i = 0; i <= input.totalClasses - input.presentClasses; i++) {
-        const futureTotalClasses = input.totalClasses;
-        const futurePresentClasses = input.presentClasses + i;
-
-        if (
-          (futurePresentClasses / futureTotalClasses) * 100 >= input.attendanceRequirement &&
-          (futurePresentClasses >= 0) &&
-          (futurePresentClasses / futureTotalClasses) * 100 >= input.attendanceRequirement
-        ) {
-          classesNeededToAttend = i;
-          break;
-        }
-      }
+    if (isBelowRequirement) {
+      // Minimum classes needed to be present for the whole semester
+      const minPresentNeeded = Math.ceil(totalClasses * requirement);
+      classesNeededToAttend = minPresentNeeded - presentClasses;
     }
 
     return {
-      classesMissable: classesMissable,
-      classesNeededToAttend: classesNeededToAttend,
-      isBelowRequirement: isBelowRequirement,
+      classesMissable: classesMissable >= 0 ? classesMissable : 0,
+      classesNeededToAttend:
+        classesNeededToAttend > 0 ? classesNeededToAttend : 0,
+      isBelowRequirement,
     };
   }
 );

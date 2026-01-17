@@ -32,6 +32,10 @@
           "type": "number",
           "description": "The attendance requirement as a percentage."
         },
+        "totalClasses": {
+          "type": "number",
+          "description": "Total number of classes in the semester."
+        },
         "present": {
           "type": "number",
           "description": "Number of classes attended."
@@ -44,6 +48,7 @@
       "required": [
         "name",
         "requirement",
+        "totalClasses",
         "present",
         "absent"
       ]

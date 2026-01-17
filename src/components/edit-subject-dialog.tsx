@@ -28,6 +28,7 @@ import type { Subject } from '@/lib/types';
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Subject name cannot be empty.' }),
   teacher: z.string().optional(),
+  totalClasses: z.coerce.number().min(1, { message: 'Must be at least 1.' }),
   requirement: z.coerce
     .number({ invalid_type_error: 'Must be a number.' })
     .min(1, { message: 'Must be at least 1.' })
@@ -52,6 +53,7 @@ export function EditSubjectDialog({
     values: {
       name: subject.name,
       teacher: subject.teacher,
+      totalClasses: subject.totalClasses,
       requirement: subject.requirement,
     },
   });
@@ -61,6 +63,7 @@ export function EditSubjectDialog({
       form.reset({
         name: subject.name,
         teacher: subject.teacher,
+        totalClasses: subject.totalClasses,
         requirement: subject.requirement,
       });
     }
@@ -110,6 +113,19 @@ export function EditSubjectDialog({
                   <FormLabel>Teacher Name (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Prof. Sharma" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="totalClasses"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Total Classes</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
