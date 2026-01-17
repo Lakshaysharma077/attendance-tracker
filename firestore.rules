@@ -78,12 +78,10 @@ service cloud.firestore {
       allow list: if isOwner(userId);
 
       // CREATE: A user can create a subject in their own collection.
-      // The incoming document's 'id' must match the document's ID in the path for data integrity.
-      allow create: if isOwner(userId) && request.resource.data.id == subjectId;
+      allow create: if isOwner(userId);
 
       // UPDATE: The owner can update their subject.
-      // The document's 'id' field is immutable and cannot be changed after creation.
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow update: if isExistingOwner(userId);
 
       // DELETE: The owner can delete their own subject.
       allow delete: if isExistingOwner(userId);
