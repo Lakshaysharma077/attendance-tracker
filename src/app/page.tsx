@@ -5,11 +5,15 @@ import { AppHeader } from '@/components/app-header';
 import { SubjectCard } from '@/components/subject-card';
 import { Button } from '@/components/ui/button';
 import { AddSubjectDialog } from '@/components/add-subject-dialog';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookOpen } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useUser } from '@/firebase/auth/use-user';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
+  const { user, isLoading: isUserLoading } = useUser();
+  const router = useRouter();
   const {
     subjects,
     addSubject,
@@ -18,8 +22,24 @@ export default function Home() {
     handlePresent,
     handleAbsent,
     isLoaded,
-  } = useSubjects();
+  } = useSubjects(user?.uid);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-muted-foreground">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

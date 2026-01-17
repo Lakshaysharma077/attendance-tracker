@@ -1,78 +1,123 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import type { Subject } from '@/lib/types';
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  increment,
+} from 'firebase/firestore';
+import { useFirestore, useCollection } from '@/firebase';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
-const STORAGE_KEY = 'classTrackSubjects';
+export function useSubjects(userId?: string) {
+  const firestore = useFirestore();
 
-export function useSubjects() {
-  const [subjects, setSubjects] = useState<Subject[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const subjectsCollection = useMemo(() => {
+    if (!firestore || !userId) return null;
+    return collection(firestore, 'users', userId, 'subjects');
+  }, [firestore, userId]);
 
-  useEffect(() => {
-    try {
-      const storedSubjects = localStorage.getItem(STORAGE_KEY);
-      if (storedSubjects) {
-        setSubjects(JSON.parse(storedSubjects));
-      }
-    } catch (error) {
-      console.error('Failed to load subjects from local storage', error);
-    }
-    setIsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (isLoaded) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(subjects));
-      } catch (error) {
-        console.error('Failed to save subjects to local storage', error);
-      }
-    }
-  }, [subjects, isLoaded]);
+  const { data: subjects, isLoading, error } = useCollection<Subject>(
+    subjectsCollection
+  );
 
   const addSubject = useCallback(
     (subject: Omit<Subject, 'id' | 'present' | 'absent'>) => {
-      const newSubject: Subject = {
+      if (!subjectsCollection) return;
+      const newSubject = {
         ...subject,
-        id: crypto.randomUUID(),
         present: 0,
         absent: 0,
       };
-      setSubjects(prev => [...prev, newSubject]);
+      addDoc(subjectsCollection, newSubject).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectsCollection.path,
+          operation: 'create',
+          requestResourceData: newSubject,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
     },
-    []
+    [subjectsCollection]
   );
 
-  const updateSubject = useCallback((updatedSubject: Subject) => {
-    setSubjects(prev =>
-      prev.map(s => (s.id === updatedSubject.id ? updatedSubject : s))
-    );
-  }, []);
+  const updateSubject = useCallback(
+    (updatedSubject: Subject) => {
+      if (!firestore || !userId) return;
+      const { id, ...data } = updatedSubject;
+      const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      updateDoc(subjectRef, data).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectRef.path,
+          operation: 'update',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    },
+    [firestore, userId]
+  );
 
-  const deleteSubject = useCallback((id: string) => {
-    setSubjects(prev => prev.filter(s => s.id !== id));
-  }, []);
+  const deleteSubject = useCallback(
+    (id: string) => {
+      if (!firestore || !userId) return;
+      const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      deleteDoc(subjectRef).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    },
+    [firestore, userId]
+  );
 
-  const handlePresent = useCallback((id: string) => {
-    setSubjects(prev =>
-      prev.map(s => (s.id === id ? { ...s, present: s.present + 1 } : s))
-    );
-  }, []);
+  const handlePresent = useCallback(
+    (id: string) => {
+      if (!firestore || !userId) return;
+      const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      updateDoc(subjectRef, { present: increment(1) }).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectRef.path,
+          operation: 'update',
+          requestResourceData: { present: 'increment(1)' },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    },
+    [firestore, userId]
+  );
 
-  const handleAbsent = useCallback((id: string) => {
-    setSubjects(prev =>
-      prev.map(s => (s.id === id ? { ...s, absent: s.absent + 1 } : s))
-    );
-  }, []);
+  const handleAbsent = useCallback(
+    (id: string) => {
+      if (!firestore || !userId) return;
+      const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      updateDoc(subjectRef, { absent: increment(1) }).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectRef.path,
+          operation: 'update',
+          requestResourceData: { absent: 'increment(1)' },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    },
+    [firestore, userId]
+  );
 
   return {
-    subjects,
+    subjects: subjects || [],
     addSubject,
     updateSubject,
     deleteSubject,
     handlePresent,
     handleAbsent,
-    isLoaded,
+    isLoaded: !isLoading,
+    error,
   };
 }
