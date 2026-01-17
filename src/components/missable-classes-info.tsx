@@ -18,9 +18,9 @@ export function MissableClassesInfo({ subject }: Props) {
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const totalConductedClasses = subject.present + subject.absent;
   const {
-    totalClasses,
-    present: presentClasses,
+    present: attendedClasses,
     requirement: attendanceRequirement,
   } = subject;
 
@@ -29,8 +29,8 @@ export function MissableClassesInfo({ subject }: Props) {
       setIsLoading(true);
       try {
         const output = await calculateClassesMissed({
-          totalClasses,
-          presentClasses,
+          totalConductedClasses,
+          attendedClasses,
           attendanceRequirement,
         });
 
@@ -46,7 +46,7 @@ export function MissableClassesInfo({ subject }: Props) {
       }
     }
     getInfo();
-  }, [totalClasses, presentClasses, attendanceRequirement]);
+  }, [totalConductedClasses, attendedClasses, attendanceRequirement]);
 
   if (isLoading) {
     return <Skeleton className="h-6 w-3/4" />;

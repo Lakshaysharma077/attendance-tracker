@@ -10,10 +10,10 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const CalculateClassesMissedInputSchema = z.object({
-  totalClasses: z
+  totalConductedClasses: z
     .number()
     .describe('The total number of classes conducted so far.'),
-  presentClasses: z
+  attendedClasses: z
     .number()
     .describe('The number of classes the student has attended.'),
   attendanceRequirement: z
@@ -47,18 +47,23 @@ const calculateClassesMissedFlow = ai.defineFlow(
     outputSchema: CalculateClassesMissedOutputSchema,
   },
   async input => {
-    const { totalClasses, presentClasses, attendanceRequirement } = input;
+    const {
+      totalConductedClasses: T,
+      attendedClasses: A,
+      attendanceRequirement,
+    } = input;
     const requirement = attendanceRequirement / 100;
 
-    if (totalClasses === 0) {
+    if (T === 0) {
       return { status: 'info', message: 'Mark attendance to see insights.' };
     }
 
-    const currentPercentage = presentClasses / totalClasses;
+    const currentPercentage = A / T;
 
     if (currentPercentage >= requirement) {
-      // CASE 1: Attendance is >= requirement. Calculate how many classes can be missed.
-      const canMiss = Math.floor(presentClasses / requirement - totalClasses);
+      // CASE 1: Attendance is >= requirement.
+      // Formula: m <= (A / requirement) - T
+      const canMiss = Math.floor(A / requirement - T);
       const plural = canMiss !== 1 ? 'es' : '';
 
       if (canMiss > 0) {
@@ -73,24 +78,23 @@ const calculateClassesMissedFlow = ai.defineFlow(
         };
       }
     } else {
-      // CASE 2: Attendance is < requirement. Calculate how many classes must be attended.
-      const mustAttend = Math.ceil(
-        (requirement * totalClasses - presentClasses) / (1 - requirement)
-      );
+      // CASE 2: Attendance is < requirement.
+      // Formula: x >= (requirement * T - A) / (1 - requirement)
+      const mustAttend = Math.ceil((requirement * T - A) / (1 - requirement));
       const plural = mustAttend !== 1 ? 'es' : '';
 
-      if (mustAttend > 0) {
+      // Handle case where requirement is 100% and it's impossible to reach.
+      if (!isFinite(mustAttend)) {
         return {
           status: 'danger',
-          message: `You need to attend the next ${mustAttend} class${plural}.`,
-        };
-      } else {
-        // Fallback for floating point issues near the threshold
-        return {
-          status: 'danger',
-          message: `You need to attend the next class to reach ${attendanceRequirement}%.`,
+          message: `It's no longer possible to reach ${attendanceRequirement}%.`,
         };
       }
+
+      return {
+        status: 'danger',
+        message: `You need to attend the next ${mustAttend} class${plural}.`,
+      };
     }
   }
 );
