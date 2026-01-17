@@ -35,17 +35,7 @@ const CalculateClassesMissedOutputSchema = z.object({
   classesMissable: z
     .number()
     .describe(
-      'The number of classes the student can miss without falling below the minimum attendance requirement.'
-    ),
-  classesNeededToAttend: z
-    .number()
-    .describe(
-      'The number of classes the student needs to attend to reach the minimum attendance requirement if they are below it.'
-    ),
-  isBelowRequirement: z
-    .boolean()
-    .describe(
-      'Whether the student is below the attendance requirement already, based on presentClasses, totalClasses, and attendanceRequirement.'
+      'The number of future classes the student can miss without falling below the minimum attendance requirement. A negative number means the requirement is no longer reachable.'
     ),
 });
 export type CalculateClassesMissedOutput = z.infer<
@@ -75,37 +65,20 @@ const calculateClassesMissedFlow = ai.defineFlow(
     if (totalClasses === 0) {
       return {
         classesMissable: 0,
-        classesNeededToAttend: 0,
-        isBelowRequirement: false,
       };
     }
 
     const requirement = attendanceRequirement / 100;
-    const conductedClasses = presentClasses + absentClasses;
 
-    // Attendance based on classes conducted so far
-    const currentAttendance =
-      conductedClasses > 0 ? (presentClasses / conductedClasses) * 100 : 100;
-    const isBelowRequirement = currentAttendance < attendanceRequirement;
-
-    // Max classes that can be missed throughout the semester
+    // Maximum number of absences allowed over the whole semester
     const maxAbsentAllowed = Math.floor(totalClasses * (1 - requirement));
 
-    // Classes that can still be missed
+    // How many more classes can be missed from now until the end.
+    // This can be negative if the user has already missed too many classes.
     const classesMissable = maxAbsentAllowed - absentClasses;
 
-    let classesNeededToAttend = 0;
-    if (isBelowRequirement) {
-      // Minimum classes needed to be present for the whole semester
-      const minPresentNeeded = Math.ceil(totalClasses * requirement);
-      classesNeededToAttend = minPresentNeeded - presentClasses;
-    }
-
     return {
-      classesMissable: classesMissable >= 0 ? classesMissable : 0,
-      classesNeededToAttend:
-        classesNeededToAttend > 0 ? classesNeededToAttend : 0,
-      isBelowRequirement,
+      classesMissable,
     };
   }
 );

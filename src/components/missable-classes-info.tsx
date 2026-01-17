@@ -43,31 +43,23 @@ export function MissableClassesInfo({ subject }: Props) {
           absentClasses,
           attendanceRequirement,
         });
-        if (output.isBelowRequirement) {
-          if (output.classesNeededToAttend > 0) {
-            const remainingClasses =
-              totalClasses - (presentClasses + absentClasses);
-            if (output.classesNeededToAttend > remainingClasses) {
-              setResult({
-                message: `Attendance requirement is no longer reachable.`,
-                type: 'warning',
-              });
-            } else {
-              setResult({
-                message: `Attend the next ${output.classesNeededToAttend} classes to be safe.`,
-                type: 'warning',
-              });
-            }
-          } else {
-            setResult({
-              message: `You are below the requirement.`,
-              type: 'warning',
-            });
-          }
+
+        const { classesMissable } = output;
+
+        if (classesMissable < 0) {
+          setResult({
+            message: `Attendance requirement is no longer reachable.`,
+            type: 'warning',
+          });
+        } else if (classesMissable === 0) {
+          setResult({
+            message: `You cannot miss any more classes to be safe.`,
+            type: 'warning',
+          });
         } else {
           setResult({
-            message: `You can miss ${output.classesMissable} more class(es).`,
-            type: 'success',
+            message: `You can miss ${classesMissable} more class(es).`,
+            type: classesMissable <= 2 ? 'warning' : 'success',
           });
         }
       } catch (error) {
