@@ -1,0 +1,144 @@
+'use client';
+
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { useEffect } from 'react';
+
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import type { Subject } from '@/lib/types';
+
+const formSchema = z.object({
+  name: z.string().min(1, { message: 'Subject name cannot be empty.' }),
+  teacher: z.string().optional(),
+  requirement: z.coerce
+    .number({ invalid_type_error: 'Must be a number.' })
+    .min(1, { message: 'Must be at least 1.' })
+    .max(100, { message: 'Cannot exceed 100.' }),
+});
+
+type EditSubjectDialogProps = {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+  subject: Subject;
+  onUpdateSubject: (subject: Subject) => void;
+};
+
+export function EditSubjectDialog({
+  isOpen,
+  setIsOpen,
+  subject,
+  onUpdateSubject,
+}: EditSubjectDialogProps) {
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    values: {
+      name: subject.name,
+      teacher: subject.teacher,
+      requirement: subject.requirement,
+    },
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: subject.name,
+        teacher: subject.teacher,
+        requirement: subject.requirement,
+      });
+    }
+  }, [isOpen, subject, form]);
+
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    onUpdateSubject({
+      ...subject,
+      ...values,
+      teacher: values.teacher || '',
+    });
+    setIsOpen(false);
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="font-headline">Edit Subject</DialogTitle>
+          <DialogDescription>
+            Update the details for your subject.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="space-y-4 py-4"
+          >
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Applied Physics" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="teacher"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teacher Name (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Prof. Sharma" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="requirement"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Attendance Requirement (%)</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button
+                type="submit"
+                className="bg-accent text-accent-foreground hover:bg-accent/90"
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
