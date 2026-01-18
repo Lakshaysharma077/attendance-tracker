@@ -42,9 +42,9 @@ export function AppHeader({ onAddSubject }: AppHeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div>
-            <h1 className="font-headline text-2xl font-bold text-foreground">
+            <div className="font-headline text-2xl font-bold text-foreground">
               ClassTrack
-            </h1>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             {user && (
