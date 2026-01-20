@@ -6,6 +6,7 @@ import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  User,
 } from 'firebase/auth';
 import { useAuth, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { useRouter } from 'next/navigation';
@@ -27,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -58,30 +59,26 @@ export function AuthForm() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleAuthSuccess = async (user: any) => {
+  const handleAuthSuccess = (user: User) => {
     if (!firestore) return;
     const userDocRef = doc(firestore, 'users', user.uid);
-    const userDoc = await getDoc(userDocRef);
 
-    if (!userDoc.exists()) {
-      const newUserProfile = {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName || user.email.split('@')[0],
-        photoURL: user.photoURL || '',
-      };
-      // Use non-blocking write for better UX and error handling
-      setDocumentNonBlocking(userDocRef, newUserProfile, { merge: false });
-      toast({
-        title: 'Account Created',
-        description: 'Welcome! Your account has been successfully created.',
-      });
-    } else {
-      toast({
-        title: 'Success',
-        description: 'Logged in successfully.',
-      });
-    }
+    const userProfile = {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || user.email?.split('@')[0],
+      photoURL: user.photoURL || '',
+    };
+
+    // Unconditionally set the document with merge:true.
+    // This creates the document if it doesn't exist, or updates it if it does.
+    // It's an idempotent operation that simplifies the sign-in/sign-up logic.
+    setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+
+    toast({
+      title: 'Success',
+      description: 'Logged in successfully.',
+    });
     router.push('/');
   };
 
@@ -115,10 +112,10 @@ export function AuthForm() {
           email,
           password
         );
-        await handleAuthSuccess(result.user);
+        handleAuthSuccess(result.user);
       } else {
         const result = await signInWithEmailAndPassword(auth, email, password);
-        await handleAuthSuccess(result.user);
+        handleAuthSuccess(result.user);
       }
     } catch (error: any) {
       handleAuthError(error);
@@ -140,7 +137,7 @@ export function AuthForm() {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      await handleAuthSuccess(result.user);
+      handleAuthSuccess(result.user);
     } catch (error: any) {
       handleAuthError(error);
     } finally {
