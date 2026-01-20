@@ -39,12 +39,12 @@
           "type": "string",
           "description": "The name of the subject or course."
         },
-        "attendanceRequirement": {
+        "requirement": {
           "type": "number",
           "description": "The minimum attendance percentage required for the subject (e.g., 75 for 75%).",
           "format": "number"
         },
-        "teacherName": {
+        "teacher": {
           "type": "string",
           "description": "The name of the teacher for the subject (optional)."
         },
@@ -53,24 +53,29 @@
           "description": "The total number of classes held for the subject.",
           "format": "number"
         },
-        "presentCount": {
+        "present": {
           "type": "number",
           "description": "The number of classes the user has attended.",
           "format": "number"
         },
-        "absentCount": {
+        "absent": {
           "type": "number",
           "description": "The number of classes the user has missed.",
           "format": "number"
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp of when the subject's attendance was last updated."
         }
       },
       "required": [
         "id",
         "name",
-        "attendanceRequirement",
+        "requirement",
         "totalClasses",
-        "presentCount",
-        "absentCount"
+        "present",
+        "absent"
       ]
     }
   },

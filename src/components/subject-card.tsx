@@ -41,6 +41,7 @@ import {
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
 
 type SubjectCardProps = {
   subject: Subject;
@@ -178,8 +179,16 @@ export function SubjectCard({
             </Button>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex-col items-start gap-2">
           <MissableClassesInfo subject={subject} />
+          {subject.lastUpdated && (
+            <p className="text-xs text-muted-foreground">
+              Last updated{' '}
+              {formatDistanceToNow(new Date(subject.lastUpdated), {
+                addSuffix: true,
+              })}
+            </p>
+          )}
         </CardFooter>
       </Card>
       <EditSubjectDialog

@@ -6,4 +6,5 @@ export interface Subject {
   totalClasses: number;
   present: number;
   absent: number;
+  lastUpdated?: string;
 }
