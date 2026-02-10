@@ -72,7 +72,7 @@ export function AddSubjectDialog({
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle className="font-headline">Add New Subject</DialogTitle>
+          <DialogTitle>Add New Subject</DialogTitle>
           <DialogDescription>
             Fill in the details for your new subject.
           </DialogDescription>

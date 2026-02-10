@@ -38,17 +38,15 @@ export function AppHeader({ onAddSubject }: AppHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-10 border-b border-border bg-card shadow-sm">
+    <header className="sticky top-0 z-10 border-b bg-background">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          <div>
-            <div className="font-headline text-2xl font-bold text-foreground">
-              ClassTrack
-            </div>
+          <div className="text-xl font-bold">
+            ClassTrack
           </div>
           <div className="flex items-center gap-4">
             {user && (
-              <Button onClick={onAddSubject}>
+              <Button size="sm" onClick={onAddSubject}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Subject
               </Button>

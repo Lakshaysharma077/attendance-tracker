@@ -149,7 +149,7 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="font-headline text-3xl font-bold tracking-tight">
+        <CardTitle className="text-2xl font-bold">
           Welcome back
         </CardTitle>
         <CardDescription>

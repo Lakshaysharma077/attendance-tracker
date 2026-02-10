@@ -49,14 +49,14 @@ export default function Home() {
         setIsOpen={setIsAddDialogOpen}
         onAddSubject={addSubject}
       />
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen bg-secondary">
         <AppHeader onAddSubject={() => setIsAddDialogOpen(true)} />
         <main className="container mx-auto px-4 py-8">
           {!isLoaded ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Skeleton className="h-96 w-full" />
-              <Skeleton className="h-96 w-full" />
-              <Skeleton className="h-96 w-full" />
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-80 w-full" />
+              <Skeleton className="h-80 w-full" />
             </div>
           ) : subjects.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -74,11 +74,11 @@ export default function Home() {
           ) : (
             <div className="flex h-[70vh] items-center justify-center">
               <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
-                <BookOpen className="mx-auto h-16 w-16 text-muted-foreground" />
-                <h2 className="mt-6 font-headline text-2xl font-semibold">
+                <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
+                <h2 className="mt-4 text-xl font-semibold">
                   No Subjects Yet
                 </h2>
-                <p className="mt-2 text-muted-foreground">
+                <p className="mt-2 text-sm text-muted-foreground">
                   Get started by adding your first subject.
                 </p>
                 <Button

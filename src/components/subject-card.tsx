@@ -65,27 +65,23 @@ export function SubjectCard({
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { total, percentage, status, statusColor, progressColor } =
-    useMemo(() => {
-      const total = subject.present + subject.absent;
-      const percentage = total > 0 ? (subject.present / total) * 100 : 0;
-      const requirement = subject.requirement;
+  const { total, percentage, status, progressColor } = useMemo(() => {
+    const total = subject.present + subject.absent;
+    const percentage = total > 0 ? (subject.present / total) * 100 : 0;
+    const requirement = subject.requirement;
 
-      let status: 'safe' | 'borderline' | 'danger' = 'danger';
-      let statusColor = 'border-destructive';
-      let progressColor = 'bg-destructive';
+    let status: 'safe' | 'borderline' | 'danger' = 'danger';
+    let progressColor = 'bg-destructive';
 
-      if (percentage >= requirement) {
-        status = 'safe';
-        statusColor = 'border-chart-2';
-        progressColor = 'bg-chart-2';
-      } else if (percentage >= requirement - 5) {
-        status = 'borderline';
-        statusColor = 'border-chart-4';
-        progressColor = 'bg-chart-4';
-      }
-      return { total, percentage, status, statusColor, progressColor };
-    }, [subject]);
+    if (percentage >= requirement) {
+      status = 'safe';
+      progressColor = 'bg-primary'; // Original was chart-2
+    } else if (percentage >= requirement - 5) {
+      status = 'borderline';
+      progressColor = 'bg-yellow-500'; // Original was chart-4
+    }
+    return { total, percentage, status, progressColor };
+  }, [subject]);
 
   const handleDelete = () => {
     onDelete(subject.id);
@@ -98,10 +94,10 @@ export function SubjectCard({
 
   return (
     <>
-      <Card className={cn('flex flex-col border-l-4', statusColor)}>
+      <Card>
         <CardHeader className="flex-row items-start justify-between">
           <div>
-            <CardTitle className="font-headline text-xl">
+            <CardTitle className="text-xl">
               {subject.name}
             </CardTitle>
             {subject.teacher && (
@@ -137,10 +133,10 @@ export function SubjectCard({
           <div className="text-center">
             <p
               className={cn(
-                'font-headline text-5xl font-bold tracking-tighter',
+                'text-5xl font-bold',
                 {
-                  'text-chart-2': status === 'safe',
-                  'text-chart-4': status === 'borderline',
+                  'text-primary': status === 'safe', // original was chart-2
+                  'text-yellow-500': status === 'borderline', // original was chart-4
                   'text-destructive': status === 'danger',
                 }
               )}
@@ -155,7 +151,7 @@ export function SubjectCard({
           <div className="space-y-2">
             <Progress
               value={percentage}
-              className={cn('h-2 [&>*]:transition-all', progressColor)}
+              className={cn('h-2', progressColor)}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>0%</span>
@@ -170,15 +166,13 @@ export function SubjectCard({
             <Button
               variant="outline"
               onClick={() => onAbsent(subject.id)}
-              className="py-6 text-base"
             >
-              <Minus className="mr-2 h-5 w-5" /> Absent
+              <Minus className="mr-2 h-4 w-4" /> Absent
             </Button>
             <Button
               onClick={() => onPresent(subject.id)}
-              className="py-6 text-base"
             >
-              <Plus className="mr-2 h-5 w-5" /> Present
+              <Plus className="mr-2 h-4 w-4" /> Present
             </Button>
           </div>
         </CardContent>
@@ -198,7 +192,7 @@ export function SubjectCard({
             <Button
               variant="link"
               size="sm"
-              className="h-auto p-0 text-xs text-accent hover:text-accent/90"
+              className="h-auto p-0 text-xs"
               onClick={() => setIsReportDialogOpen(true)}
             >
               <FileText className="mr-1 h-3 w-3" />
