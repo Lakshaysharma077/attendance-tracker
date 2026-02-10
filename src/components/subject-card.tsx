@@ -38,10 +38,12 @@ import {
   Plus,
   Edit,
   Trash2,
+  FileText,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
+import { AttendanceReportDialog } from './attendance-report-dialog';
 
 type SubjectCardProps = {
   subject: Subject;
@@ -60,6 +62,7 @@ export function SubjectCard({
 }: SubjectCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const { toast } = useToast();
 
   const { total, percentage, status, statusColor, progressColor } =
@@ -181,14 +184,27 @@ export function SubjectCard({
         </CardContent>
         <CardFooter className="flex-col items-start gap-2">
           <MissableClassesInfo subject={subject} />
-          {subject.lastUpdated && (
-            <p className="text-xs text-muted-foreground">
-              Last updated{' '}
-              {formatDistanceToNow(new Date(subject.lastUpdated), {
-                addSuffix: true,
-              })}
-            </p>
-          )}
+          <div className="flex w-full items-center justify-between">
+            {subject.lastUpdated ? (
+              <p className="text-xs text-muted-foreground">
+                Last updated{' '}
+                {formatDistanceToNow(new Date(subject.lastUpdated), {
+                  addSuffix: true,
+                })}
+              </p>
+            ) : (
+              <div /> // Placeholder for spacing
+            )}
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 text-xs text-accent hover:text-accent/90"
+              onClick={() => setIsReportDialogOpen(true)}
+            >
+              <FileText className="mr-1 h-3 w-3" />
+              View Report
+            </Button>
+          </div>
         </CardFooter>
       </Card>
       <EditSubjectDialog
@@ -220,6 +236,11 @@ export function SubjectCard({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AttendanceReportDialog
+        isOpen={isReportDialogOpen}
+        setIsOpen={setIsReportDialogOpen}
+        subject={subject}
+      />
     </>
   );
 }

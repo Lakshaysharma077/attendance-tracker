@@ -35,6 +35,7 @@ export function useSubjects(userId?: string) {
         ...subject,
         present: 0,
         absent: 0,
+        lastUpdated: new Date().toISOString(),
       };
       addDoc(subjectsCollection, newSubject).catch(async () => {
         const permissionError = new FirestorePermissionError({
@@ -87,6 +88,24 @@ export function useSubjects(userId?: string) {
     (id: string) => {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      const attendanceCollectionRef = collection(subjectRef, 'attendance');
+
+      const attendanceRecord = {
+        date: new Date().toISOString(),
+        status: 'present' as const,
+      };
+
+      // Add historical record
+      addDoc(attendanceCollectionRef, attendanceRecord).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: attendanceCollectionRef.path,
+          operation: 'create',
+          requestResourceData: attendanceRecord,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+      // Update aggregate
       updateDoc(subjectRef, {
         present: increment(1),
         lastUpdated: new Date().toISOString(),
@@ -106,6 +125,24 @@ export function useSubjects(userId?: string) {
     (id: string) => {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
+      const attendanceCollectionRef = collection(subjectRef, 'attendance');
+
+      const attendanceRecord = {
+        date: new Date().toISOString(),
+        status: 'absent' as const,
+      };
+
+      // Add historical record
+      addDoc(attendanceCollectionRef, attendanceRecord).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: attendanceCollectionRef.path,
+          operation: 'create',
+          requestResourceData: attendanceRecord,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+      // Update aggregate
       updateDoc(subjectRef, {
         absent: increment(1),
         lastUpdated: new Date().toISOString(),

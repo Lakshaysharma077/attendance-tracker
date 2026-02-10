@@ -8,3 +8,9 @@ export interface Subject {
   absent: number;
   lastUpdated?: string;
 }
+
+export interface AttendanceRecord {
+  id: string;
+  date: string; // ISO string
+  status: 'present' | 'absent';
+}

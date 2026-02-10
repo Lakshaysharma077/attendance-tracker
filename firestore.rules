@@ -85,6 +85,18 @@ service cloud.firestore {
 
       // DELETE: The owner can delete their own subject.
       allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for a subject's private attendance history.
+       * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
+       * @allow       (get, list, create): An owner can read and create their own attendance records.
+       * @deny        (update, delete): History is immutable to preserve data integrity.
+       */
+      match /attendance/{attendanceId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isOwner(userId);
+          allow update, delete: if false;
+      }
     }
   }
 }
