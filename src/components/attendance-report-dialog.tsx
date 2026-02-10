@@ -79,11 +79,6 @@ export function AttendanceReportDialog({
                             ? 'default'
                             : 'destructive'
                         }
-                        className={
-                          record.status === 'present'
-                            ? 'border-transparent bg-chart-2 text-primary-foreground hover:bg-chart-2/80'
-                            : ''
-                        }
                       >
                         {record.status.charAt(0).toUpperCase() +
                           record.status.slice(1)}

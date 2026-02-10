@@ -75,10 +75,10 @@ export function SubjectCard({
 
     if (percentage >= requirement) {
       status = 'safe';
-      progressColor = 'bg-primary'; // Original was chart-2
+      progressColor = 'bg-primary';
     } else if (percentage >= requirement - 5) {
       status = 'borderline';
-      progressColor = 'bg-yellow-500'; // Original was chart-4
+      progressColor = 'bg-yellow-500';
     }
     return { total, percentage, status, progressColor };
   }, [subject]);
@@ -135,8 +135,8 @@ export function SubjectCard({
               className={cn(
                 'text-5xl font-bold',
                 {
-                  'text-primary': status === 'safe', // original was chart-2
-                  'text-yellow-500': status === 'borderline', // original was chart-4
+                  'text-primary': status === 'safe',
+                  'text-yellow-500': status === 'borderline',
                   'text-destructive': status === 'danger',
                 }
               )}
