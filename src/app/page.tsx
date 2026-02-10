@@ -6,7 +6,7 @@ import { SubjectCard } from '@/components/subject-card';
 import { Button } from '@/components/ui/button';
 import { AddSubjectDialog } from '@/components/add-subject-dialog';
 import { useState, useEffect } from 'react';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/firebase/auth/use-user';
 import { useRouter } from 'next/navigation';
@@ -35,6 +35,7 @@ export default function Home() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">Loading your dashboard...</p>
         </div>
       </div>
@@ -72,7 +73,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="flex h-[70vh] items-center justify-center">
-              <div className="text-center">
+              <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-card p-12 text-center">
                 <BookOpen className="mx-auto h-16 w-16 text-muted-foreground" />
                 <h2 className="mt-6 font-headline text-2xl font-semibold">
                   No Subjects Yet
@@ -81,7 +82,7 @@ export default function Home() {
                   Get started by adding your first subject.
                 </p>
                 <Button
-                  className="mt-6 bg-accent text-accent-foreground hover:bg-accent/90"
+                  className="mt-6"
                   onClick={() => setIsAddDialogOpen(true)}
                 >
                   Add Subject

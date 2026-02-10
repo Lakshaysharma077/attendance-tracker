@@ -145,12 +145,7 @@ export function EditSubjectDialog({
               )}
             />
             <DialogFooter>
-              <Button
-                type="submit"
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-              >
-                Save Changes
-              </Button>
+              <Button type="submit">Save Changes</Button>
             </DialogFooter>
           </form>
         </Form>

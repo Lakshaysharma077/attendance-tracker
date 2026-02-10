@@ -149,9 +149,11 @@ export function AuthForm() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Welcome</CardTitle>
+        <CardTitle className="font-headline text-3xl font-bold tracking-tight">
+          Welcome back
+        </CardTitle>
         <CardDescription>
-          Sign in or create an account to track your attendance.
+          Choose your preferred sign-in method to continue.
         </CardDescription>
       </CardHeader>
       <CardContent>

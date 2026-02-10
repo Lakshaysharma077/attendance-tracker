@@ -135,12 +135,7 @@ export function AddSubjectDialog({
               )}
             />
             <DialogFooter>
-              <Button
-                type="submit"
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-              >
-                Add Subject
-              </Button>
+              <Button type="submit">Add Subject</Button>
             </DialogFooter>
           </form>
         </Form>

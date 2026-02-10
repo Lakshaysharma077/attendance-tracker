@@ -48,10 +48,7 @@ export function AppHeader({ onAddSubject }: AppHeaderProps) {
           </div>
           <div className="flex items-center gap-4">
             {user && (
-              <Button
-                onClick={onAddSubject}
-                className="bg-accent text-accent-foreground hover:bg-accent/90"
-              >
+              <Button onClick={onAddSubject}>
                 <Plus className="mr-2 h-4 w-4" />
                 Add Subject
               </Button>
