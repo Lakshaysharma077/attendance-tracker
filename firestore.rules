@@ -1,102 +1,98 @@
 /**
- * This ruleset enforces a strict user-ownership security model for an attendance tracking application.
+ * This ruleset enforces a strict user-ownership model for a ClassTrack attendance application.
  *
  * Core Philosophy:
- * All user-generated data is private. A user can only access, modify, or delete data
- * that exists within their own user-specific data tree. There is no concept of public or
- * shared data in this model.
+ * The security model is built on the principle that users have complete control over their own
+ * data, and absolutely no access to the data of other users. All operations are authorized
+ * based on the authenticated user's unique ID (UID).
  *
  * Data Structure:
- * All application data is nested under a user-specific path: `/users/{userId}`.
- * For example, a user's subjects are stored at `/users/{userId}/subjects/{subjectId}`.
- * This structure makes ownership explicit and allows for simple, performant security rules.
+ * All user-specific data is hierarchically organized and isolated under the `/users/{userId}`
+ * path. For example, a user's academic subjects are stored in a subcollection at
+ * `/users/{userId}/subjects/{subjectId}`. This structure is fundamental to the security model.
  *
  * Key Security Decisions:
- * - Default Deny: Access is denied by default. All permissions must be explicitly granted.
- * - No User Listing: It is not possible to list documents in the top-level `/users` collection.
- * - Path-Based Authorization: Ownership is determined by matching the authenticated user's ID
- *   (`request.auth.uid`) with the `userId` wildcard in the document path. This avoids costly
- *   `get()` calls to other documents for authorization checks.
- * - Prototyping Flexibility: The rules strictly enforce *who* can access data but do not
- *   enforce the *shape* of that data. This allows for rapid iteration on the application's
- *   data model without needing to update security rules for every schema change.
+ * - User Isolation: A user can only read or write documents within their own data tree
+ *   (i.e., where the `{userId}` in the path matches their `request.auth.uid`).
+ * - No User Listing: It is not possible for any client to list all documents in the top-level
+ *   `/users` collection, protecting user privacy.
+ * - Ownership is Path-Based: Authorization relies on the `{userId}` wildcard in the document
+ *   path. This avoids costly `get()` calls to other documents and makes the rules highly
+ *   performant and simple to audit.
+ * - Default Deny: Any path not explicitly defined in these rules is inaccessible.
  */
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions for readability and reusability.
+    // ----------------------------------------------------------------------
+    // Helper Functions
+    // ----------------------------------------------------------------------
 
     /**
-     * Checks if the request is from an authenticated user.
+     * Checks if the user is authenticated.
      */
     function isSignedIn() {
       return request.auth != null;
     }
 
     /**
-     * Checks if the requesting user's UID matches the document owner's UID from the path.
+     * Checks if the authenticated user's UID matches the provided userId from the path.
+     * This is the primary function for establishing ownership.
+     * @param userId The user ID from the document path.
      */
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
 
     /**
-     * Checks for ownership on an existing document.
-     * CRITICAL: Used for update and delete to prevent modifying non-existent data.
+     * A stricter ownership check for update and delete operations.
+     * It verifies ownership AND ensures the document already exists.
+     * @param userId The user ID from the document path.
      */
     function isExistingOwner(userId) {
       return isOwner(userId) && resource != null;
     }
 
+    // ----------------------------------------------------------------------
+    // Collection Rules
+    // ----------------------------------------------------------------------
+
     /**
-     * @description Rules for a user's own profile document.
+     * @description Rules for the user document root. This allows a user to create their
+     *              own user document but prevents them from seeing or interacting with
+     *              any other user's document. Listing all users is explicitly denied.
      * @path        /users/{userId}
-     * @allow       (create): A user can create their own profile document.
-     * @allow       (get, update): A user can read or update their own profile.
-     * @deny        (get, update, delete): A user cannot access another user's profile.
+     * @allow       (create) An authenticated user can create their own user document:
+     *              `db.collection('users').doc('user_abc').set({...})` where auth.uid is 'user_abc'.
+     * @deny        (list) A user tries to get a list of all users in the app:
+     *              `db.collection('users').get()`.
+     * @principle   Restricts access to a user's own data tree and prevents user enumeration.
      */
     match /users/{userId} {
-      allow get, update: if isOwner(userId);
-      // A user can create their own profile document, ensuring the UID in the doc matches.
-      allow create: if isOwner(userId) && request.resource.data.uid == userId;
-      // Deleting user profile documents is disallowed for data integrity.
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
       allow delete: if false;
     }
 
-
     /**
-     * @description Rules for a user's private 'subjects' collection.
+     * @description Rules for a user's private 'subjects' documents. Only the owner
+     *              of the data can read, create, update, or delete their own subjects.
      * @path        /users/{userId}/subjects/{subjectId}
-     * @allow       (create): An authenticated user (UID 'user_abc') can create their own subject at '/users/user_abc/subjects/math101'.
-     * @deny        (get): A user ('user_xyz') cannot read a subject belonging to another user at '/users/user_abc/subjects/math101'.
-     * @principle   Restricts all access to the document owner, based on the `userId` in the path.
+     * @allow       (get) An authenticated user reads one of their own subjects:
+     *              `db.doc('/users/user_abc/subjects/subj_123').get()` where auth.uid is 'user_abc'.
+     * @deny        (update) A user tries to modify a subject belonging to another user:
+     *              `db.doc('/users/user_xyz/subjects/subj_456').update({...})` where auth.uid is 'user_abc'.
+     * @principle   Enforces a strict ownership model for all CRUD operations on a user's private data.
      */
     match /users/{userId}/subjects/{subjectId} {
-      // READ: Users can get and list their own subjects.
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
-
-      // CREATE: A user can create a subject in their own collection.
-      allow create: if isOwner(userId);
-
-      // UPDATE: The owner can update their subject.
-      allow update: if isExistingOwner(userId);
-
-      // DELETE: The owner can delete their own subject.
+      allow create: if isOwner(userId) && request.resource.data.id == subjectId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
-
-      /**
-       * @description Rules for a subject's private attendance history.
-       * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
-       * @allow       (get, list, create): An owner can read and create their own attendance records.
-       * @deny        (update, delete): History is immutable to preserve data integrity.
-       */
-      match /attendance/{attendanceId} {
-          allow get, list: if isOwner(userId);
-          allow create: if isOwner(userId);
-          allow update, delete: if false;
-      }
     }
   }
 }

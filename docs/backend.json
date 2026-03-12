@@ -1,35 +1,10 @@
 {
   "entities": {
-    "UserProfile": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "User Profile",
-      "type": "object",
-      "description": "Represents a user's profile information.",
-      "properties": {
-        "uid": {
-          "type": "string",
-          "description": "The user's unique ID."
-        },
-        "email": {
-          "type": "string",
-          "description": "The user's email address."
-        },
-        "displayName": {
-          "type": "string",
-          "description": "The user's display name."
-        },
-        "photoURL": {
-          "type": "string",
-          "description": "URL of the user's profile picture."
-        }
-      },
-      "required": ["uid", "email"]
-    },
     "Subject": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "title": "Subject",
       "type": "object",
-      "description": "Represents a subject or course that the user is tracking attendance for.",
+      "description": "Represents a single academic subject or course for which a student tracks attendance. This entity stores all relevant attendance statistics and metadata.",
       "properties": {
         "id": {
           "type": "string",
@@ -37,96 +12,59 @@
         },
         "name": {
           "type": "string",
-          "description": "The name of the subject or course."
+          "description": "The name of the subject or course, e.g., 'Introduction to Computer Science'."
         },
-        "requirement": {
+        "attendanceRequirementPercentage": {
           "type": "number",
-          "description": "The minimum attendance percentage required for the subject (e.g., 75 for 75%).",
-          "format": "number"
+          "description": "The minimum attendance percentage required for this subject, a value between 1 and 100."
         },
-        "teacher": {
+        "teacherName": {
           "type": "string",
-          "description": "The name of the teacher for the subject (optional)."
+          "description": "The name of the teacher or instructor for this subject. This field is optional."
         },
         "totalClasses": {
           "type": "number",
-          "description": "The total number of classes held for the subject.",
-          "format": "number"
+          "description": "The total number of classes conducted or recorded for this subject, including both present and absent counts."
         },
-        "present": {
+        "presentClasses": {
           "type": "number",
-          "description": "The number of classes the user has attended.",
-          "format": "number"
+          "description": "The count of classes the student has marked as 'present' for this subject."
         },
-        "absent": {
+        "absentClasses": {
           "type": "number",
-          "description": "The number of classes the user has missed.",
-          "format": "number"
+          "description": "The count of classes the student has marked as 'absent' for this subject."
         },
-        "lastUpdated": {
+        "createdAt": {
           "type": "string",
-          "format": "date-time",
-          "description": "The timestamp of when the subject's attendance was last updated."
+          "description": "Timestamp when the subject was first created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp of the last time any attendance was marked or subject details were updated.",
+          "format": "date-time"
         }
       },
       "required": [
         "id",
         "name",
-        "requirement",
+        "attendanceRequirementPercentage",
         "totalClasses",
-        "present",
-        "absent"
+        "presentClasses",
+        "absentClasses",
+        "createdAt",
+        "updatedAt"
       ]
-    },
-    "AttendanceRecord": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Attendance Record",
-      "description": "Represents a single attendance event (present or absent) for a subject on a specific date.",
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the attendance record."
-        },
-        "date": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The timestamp of when the attendance was recorded."
-        },
-        "status": {
-          "type": "string",
-          "enum": ["present", "absent"],
-          "description": "The attendance status for that event."
-        }
-      },
-      "required": ["id", "date", "status"]
     }
   },
   "auth": {
     "providers": [
       "password",
-      "anonymous",
-      "google.com"
+      "anonymous"
     ]
   },
   "firestore": {
     "structure": [
-      {
-        "path": "/users/{userId}",
-        "definition": {
-          "entityName": "UserProfile",
-          "schema": {
-            "$ref": "#/backend/entities/UserProfile"
-          },
-          "description": "Stores user profile information. The userId path segment is the user's UID.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user (matches auth UID)."
-            }
-          ]
-        }
-      },
       {
         "path": "/users/{userId}/subjects/{subjectId}",
         "definition": {
@@ -134,44 +72,20 @@
           "schema": {
             "$ref": "#/backend/entities/Subject"
           },
-          "description": "Stores subject data for each user. The userId path segment indicates the owner. The subjectId is the unique identifier for each subject. Data access is restricted to the user who owns the subject.",
+          "description": "Stores individual academic subjects and their associated attendance data for a specific user. Ownership is intrinsically tied to the '{userId}' in the path, ensuring direct and secure access control by the authenticated user.",
           "params": [
             {
               "name": "userId",
-              "description": "The unique identifier of the user."
+              "description": "The unique identifier of the user who owns this subject data (corresponding to 'request.auth.uid')."
             },
             {
               "name": "subjectId",
-              "description": "The unique identifier of the subject."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/subjects/{subjectId}/attendance/{attendanceId}",
-        "definition": {
-          "entityName": "AttendanceRecord",
-          "schema": {
-            "$ref": "#/backend/entities/AttendanceRecord"
-          },
-          "description": "Stores individual attendance records for a specific subject belonging to a user. Access is restricted to the user who owns the parent subject.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "subjectId",
-              "description": "The unique identifier of the subject."
-            },
-            {
-              "name": "attendanceId",
-              "description": "The unique identifier of the attendance record."
+              "description": "The unique identifier for a specific academic subject."
             }
           ]
         }
       }
     ],
-    "reasoning": "The data structure prioritizes simplicity and security. User profiles are stored at `/users/{userId}`. Subjects are stored under each user's document to ensure straightforward ownership and prevent unauthorized access. This design avoids complex authorization logic in the rules by making ownership explicit through the path. It also facilitates listing subjects specific to a user without exposing other users' data."
+    "reasoning": "The recommended Firestore structure for the ClassTrack application prioritizes secure, scalable, and debuggable authorization for user-owned attendance data. Following the core design principles, especially Authorization Independence and Structural Segregation, all subject data for a specific user will be stored under a hierarchical path: `/users/{userId}/subjects/{subjectId}`. This structure ensures that each user's data is isolated and directly addressable.\n\n**Authorization Independence (CRITICAL):** This structure achieves Authorization Independence by embedding the owner's identifier (`{userId}`) directly into the document path. For any document at `/users/{userId}/subjects/{subjectId}`, the `userId` wildcard explicitly represents the owner. This means that Firestore Security Rules can authorize access simply by comparing `request.auth.uid` with the `{userId}` in the path (e.g., `allow read, write: if request.auth.uid == userId;`). This eliminates the need for `get()` calls to a parent user document or to explicitly denormalize an `ownerId` field within the `Subject` document for authorization purposes, making rules atomic, simple to write, and highly performant.\n\n**QAPs (Rules are not Filters):** This design inherently supports Querying All Possibilities (QAPs). When a user queries for their subjects, they will issue a query like `db.collection('users').doc(request.auth.uid).collection('subjects').get()`. The security rules will directly evaluate `request.auth.uid == userId` for all documents in the `/users/{userId}/subjects` subcollection. Only documents where this condition is true (i.e., only the current user's subjects) will be returned. This ensures that the client application never receives unauthorized data, and the security rules do not act as data filters on a broader, less secure dataset. The structure inherently segregates data by user, providing a homogeneous security posture for all documents within a given user's `subjects` subcollection."
   }
 }
