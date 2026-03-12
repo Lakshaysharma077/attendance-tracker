@@ -63,11 +63,6 @@ service cloud.firestore {
      *              own user document but prevents them from seeing or interacting with
      *              any other user's document. Listing all users is explicitly denied.
      * @path        /users/{userId}
-     * @allow       (create) An authenticated user can create their own user document:
-     *              `db.collection('users').doc('user_abc').set({...})` where auth.uid is 'user_abc'.
-     * @deny        (list) A user tries to get a list of all users in the app:
-     *              `db.collection('users').get()`.
-     * @principle   Restricts access to a user's own data tree and prevents user enumeration.
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
@@ -78,33 +73,36 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for a user's private 'subjects' documents. Only the owner
-     *              of the data can read, create, update, or delete their own subjects.
+     * @description Rules for a user's private 'subjects' collection.
+     * @path        /users/{userId}/subjects
+     */
+    match /users/{userId}/subjects {
+      allow list, create: if isOwner(userId);
+    }
+
+    /**
+     * @description Rules for a user's private 'subjects' documents.
      * @path        /users/{userId}/subjects/{subjectId}
-     * @allow       (get) An authenticated user reads one of their own subjects:
-     *              `db.doc('/users/user_abc/subjects/subj_123').get()` where auth.uid is 'user_abc'.
-     * @deny        (update) A user tries to modify a subject belonging to another user:
-     *              `db.doc('/users/user_xyz/subjects/subj_456').update({...})` where auth.uid is 'user_abc'.
-     * @principle   Enforces a strict ownership model for all CRUD operations on a user's private data.
      */
     match /users/{userId}/subjects/{subjectId} {
       allow get: if isOwner(userId);
-      allow list: if isOwner(userId);
-      allow create: if isOwner(userId);
-      allow update: if isExistingOwner(userId);
-      allow delete: if isExistingOwner(userId);
+      allow update, delete: if isExistingOwner(userId);
+    }
 
-      /**
-       * @description Rules for a subject's 'attendance' subcollection. Only the owner of the
-       *              parent subject can manage attendance records.
-       * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
-       * @allow       (list) A user lists all attendance records for their own subject.
-       * @deny        (get) A user tries to read an attendance record for another user's subject.
-       * @principle   Cascades ownership from the parent document to the subcollection.
-       */
-      match /attendance/{attendanceId} {
-        allow read, write: if isOwner(userId);
-      }
+    /**
+     * @description Rules for a subject's 'attendance' subcollection.
+     * @path        /users/{userId}/subjects/{subjectId}/attendance
+     */
+    match /users/{userId}/subjects/{subjectId}/attendance {
+      allow list, create: if isOwner(userId);
+    }
+
+    /**
+     * @description Rules for individual 'attendance' documents.
+     * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
+     */
+    match /users/{userId}/subjects/{subjectId}/attendance/{attendanceId} {
+      allow get, update, delete: if isOwner(userId);
     }
   }
 }
