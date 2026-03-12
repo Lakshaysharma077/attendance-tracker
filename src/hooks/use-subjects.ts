@@ -9,6 +9,7 @@ import {
   deleteDoc,
   doc,
   increment,
+  writeBatch,
 } from 'firebase/firestore';
 import { useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
@@ -89,33 +90,39 @@ export function useSubjects(userId?: string) {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
       const attendanceCollectionRef = collection(subjectRef, 'attendance');
+      const newAttendanceRef = doc(attendanceCollectionRef);
+
+      const batch = writeBatch(firestore);
 
       const attendanceRecord = {
         date: new Date().toISOString(),
         status: 'present' as const,
       };
+      batch.set(newAttendanceRef, attendanceRecord);
 
-      // Add historical record
-      addDoc(attendanceCollectionRef, attendanceRecord).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: attendanceCollectionRef.path,
-          operation: 'create',
-          requestResourceData: attendanceRecord,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-      // Update aggregate
-      updateDoc(subjectRef, {
+      const subjectUpdates = {
         present: increment(1),
         lastUpdated: new Date().toISOString(),
-      }).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: subjectRef.path,
-          operation: 'update',
-          requestResourceData: { present: 'increment(1)' },
-        });
-        errorEmitter.emit('permission-error', permissionError);
+      };
+      batch.update(subjectRef, subjectUpdates);
+
+      batch.commit().catch(async () => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: newAttendanceRef.path,
+            operation: 'create',
+            requestResourceData: attendanceRecord,
+          })
+        );
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: subjectRef.path,
+            operation: 'update',
+            requestResourceData: { present: 'increment(1)' },
+          })
+        );
       });
     },
     [firestore, userId]
@@ -126,33 +133,39 @@ export function useSubjects(userId?: string) {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
       const attendanceCollectionRef = collection(subjectRef, 'attendance');
+      const newAttendanceRef = doc(attendanceCollectionRef);
+
+      const batch = writeBatch(firestore);
 
       const attendanceRecord = {
         date: new Date().toISOString(),
         status: 'absent' as const,
       };
+      batch.set(newAttendanceRef, attendanceRecord);
 
-      // Add historical record
-      addDoc(attendanceCollectionRef, attendanceRecord).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: attendanceCollectionRef.path,
-          operation: 'create',
-          requestResourceData: attendanceRecord,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
-
-      // Update aggregate
-      updateDoc(subjectRef, {
+      const subjectUpdates = {
         absent: increment(1),
         lastUpdated: new Date().toISOString(),
-      }).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: subjectRef.path,
-          operation: 'update',
-          requestResourceData: { absent: 'increment(1)' },
-        });
-        errorEmitter.emit('permission-error', permissionError);
+      };
+      batch.update(subjectRef, subjectUpdates);
+
+      batch.commit().catch(async () => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: newAttendanceRef.path,
+            operation: 'create',
+            requestResourceData: attendanceRecord,
+          })
+        );
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: subjectRef.path,
+            operation: 'update',
+            requestResourceData: { absent: 'increment(1)' },
+          })
+        );
       });
     },
     [firestore, userId]
@@ -170,33 +183,39 @@ export function useSubjects(userId?: string) {
       const subjectRef = doc(firestore, 'users', userId, 'subjects', subjectId);
       const attendanceRef = doc(subjectRef, 'attendance', attendanceId);
 
+      const batch = writeBatch(firestore);
+
       // Update attendance record status
-      updateDoc(attendanceRef, { status: newStatus }).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: attendanceRef.path,
-          operation: 'update',
-          requestResourceData: { status: newStatus },
-        });
-        errorEmitter.emit('permission-error', permissionError);
-      });
+      batch.update(attendanceRef, { status: newStatus });
 
       // Update aggregate counts on the subject
-      const updates = {
+      const subjectUpdates = {
         present: increment(newStatus === 'present' ? 1 : -1),
         absent: increment(newStatus === 'absent' ? 1 : -1),
         lastUpdated: new Date().toISOString(),
       };
+      batch.update(subjectRef, subjectUpdates);
 
-      updateDoc(subjectRef, updates).catch(async () => {
-        const permissionError = new FirestorePermissionError({
-          path: subjectRef.path,
-          operation: 'update',
-          requestResourceData: {
-            present: `increment(${newStatus === 'present' ? 1 : -1})`,
-            absent: `increment(${newStatus === 'absent' ? 1 : -1})`,
-          },
-        });
-        errorEmitter.emit('permission-error', permissionError);
+      batch.commit().catch(async () => {
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: attendanceRef.path,
+            operation: 'update',
+            requestResourceData: { status: newStatus },
+          })
+        );
+        errorEmitter.emit(
+          'permission-error',
+          new FirestorePermissionError({
+            path: subjectRef.path,
+            operation: 'update',
+            requestResourceData: {
+              present: `increment(${newStatus === 'present' ? 1 : -1})`,
+              absent: `increment(${newStatus === 'absent' ? 1 : -1})`,
+            },
+          })
+        );
       });
     },
     [firestore, userId]
