@@ -21,6 +21,7 @@ export default function Home() {
     deleteSubject,
     handlePresent,
     handleAbsent,
+    updateAttendanceStatus,
     isLoaded,
   } = useSubjects(user?.uid);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -68,6 +69,7 @@ export default function Home() {
                   onDelete={deleteSubject}
                   onPresent={handlePresent}
                   onAbsent={handleAbsent}
+                  onUpdateAttendanceStatus={updateAttendanceStatus}
                 />
               ))}
             </div>

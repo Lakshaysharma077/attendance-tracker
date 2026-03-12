@@ -158,6 +158,50 @@ export function useSubjects(userId?: string) {
     [firestore, userId]
   );
 
+  const updateAttendanceStatus = useCallback(
+    (
+      subjectId: string,
+      attendanceId: string,
+      oldStatus: 'present' | 'absent'
+    ) => {
+      if (!firestore || !userId) return;
+
+      const newStatus = oldStatus === 'present' ? 'absent' : 'present';
+      const subjectRef = doc(firestore, 'users', userId, 'subjects', subjectId);
+      const attendanceRef = doc(subjectRef, 'attendance', attendanceId);
+
+      // Update attendance record status
+      updateDoc(attendanceRef, { status: newStatus }).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: attendanceRef.path,
+          operation: 'update',
+          requestResourceData: { status: newStatus },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+
+      // Update aggregate counts on the subject
+      const updates = {
+        present: increment(newStatus === 'present' ? 1 : -1),
+        absent: increment(newStatus === 'absent' ? 1 : -1),
+        lastUpdated: new Date().toISOString(),
+      };
+
+      updateDoc(subjectRef, updates).catch(async () => {
+        const permissionError = new FirestorePermissionError({
+          path: subjectRef.path,
+          operation: 'update',
+          requestResourceData: {
+            present: `increment(${newStatus === 'present' ? 1 : -1})`,
+            absent: `increment(${newStatus === 'absent' ? 1 : -1})`,
+          },
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    },
+    [firestore, userId]
+  );
+
   return {
     subjects: subjects || [],
     addSubject,
@@ -165,6 +209,7 @@ export function useSubjects(userId?: string) {
     deleteSubject,
     handlePresent,
     handleAbsent,
+    updateAttendanceStatus,
     isLoaded: !isLoading,
     error,
   };

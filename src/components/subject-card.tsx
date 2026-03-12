@@ -51,6 +51,11 @@ type SubjectCardProps = {
   onDelete: (id: string) => void;
   onPresent: (id: string) => void;
   onAbsent: (id: string) => void;
+  onUpdateAttendanceStatus: (
+    subjectId: string,
+    attendanceId: string,
+    oldStatus: 'present' | 'absent'
+  ) => void;
 };
 
 export function SubjectCard({
@@ -59,6 +64,7 @@ export function SubjectCard({
   onDelete,
   onPresent,
   onAbsent,
+  onUpdateAttendanceStatus,
 }: SubjectCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -97,7 +103,7 @@ export function SubjectCard({
       <Card>
         <CardHeader className="flex-row items-start justify-between">
           <div>
-            <CardTitle className="text-xl">
+            <CardTitle className="text-xl font-bold">
               {subject.name}
             </CardTitle>
             {subject.teacher && (
@@ -138,7 +144,8 @@ export function SubjectCard({
                   'text-primary': status === 'safe',
                   'text-yellow-500': status === 'borderline',
                   'text-destructive': status === 'danger',
-                }
+                },
+                'font-sans'
               )}
             >
               {percentage.toFixed(1)}
@@ -234,6 +241,7 @@ export function SubjectCard({
         isOpen={isReportDialogOpen}
         setIsOpen={setIsReportDialogOpen}
         subject={subject}
+        onUpdateAttendanceStatus={onUpdateAttendanceStatus}
       />
     </>
   );
