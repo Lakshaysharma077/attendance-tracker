@@ -55,6 +55,35 @@
         "createdAt",
         "updatedAt"
       ]
+    },
+    "AttendanceRecord": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AttendanceRecord",
+      "description": "Represents a single attendance record for a subject on a specific date. This is stored as a document in a subcollection under its parent Subject.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AttendanceRecord entity (this is the Firestore document ID)."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The ISO 8601 timestamp when the attendance was recorded."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "present",
+            "absent"
+          ],
+          "description": "The attendance status for that record."
+        }
+      },
+      "required": [
+        "date",
+        "status"
+      ]
     }
   },
   "auth": {
@@ -82,6 +111,30 @@
             {
               "name": "subjectId",
               "description": "The unique identifier for a specific academic subject."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/subjects/{subjectId}/attendance/{attendanceId}",
+        "definition": {
+          "entityName": "AttendanceRecord",
+          "schema": {
+            "$ref": "#/backend/entities/AttendanceRecord"
+          },
+          "description": "Stores an individual attendance record for a specific subject. Ownership is inherited from the parent subject's owner.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this data."
+            },
+            {
+              "name": "subjectId",
+              "description": "The unique identifier for the parent academic subject."
+            },
+            {
+              "name": "attendanceId",
+              "description": "The unique identifier for a specific attendance record."
             }
           ]
         }

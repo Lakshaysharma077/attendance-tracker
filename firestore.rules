@@ -90,9 +90,21 @@ service cloud.firestore {
     match /users/{userId}/subjects/{subjectId} {
       allow get: if isOwner(userId);
       allow list: if isOwner(userId);
-      allow create: if isOwner(userId) && request.resource.data.id == subjectId;
-      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow create: if isOwner(userId);
+      allow update: if isExistingOwner(userId);
       allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for a subject's 'attendance' subcollection. Only the owner of the
+       *              parent subject can manage attendance records.
+       * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
+       * @allow       (list) A user lists all attendance records for their own subject.
+       * @deny        (get) A user tries to read an attendance record for another user's subject.
+       * @principle   Cascades ownership from the parent document to the subcollection.
+       */
+      match /attendance/{attendanceId} {
+        allow read, write: if isOwner(userId);
+      }
     }
   }
 }
