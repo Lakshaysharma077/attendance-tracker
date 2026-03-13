@@ -31,27 +31,34 @@ function Dashboard({ user }: { user: any }) {
         setIsOpen={setIsAddDialogOpen}
         onAddSubject={addSubject}
       />
-      <div className="min-h-screen bg-secondary">
+      <div className="min-h-screen bg-slate-100 flex flex-col relative overflow-hidden">
+        {/* Floating 3D Background Elements for Dashboard */}
+        <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-5%] right-[-5%] w-[40vw] h-[40vw] bg-primary/5 rounded-full blur-[100px] animate-float-3d" />
+          <div className="absolute bottom-[0%] left-[-10%] w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[120px] animate-float-3d" style={{ animationDelay: '-3s' }} />
+        </div>
+
         <AppHeader onAddSubject={() => setIsAddDialogOpen(true)} />
-        <main className="container mx-auto px-4 py-8">
+        <main className="container mx-auto px-4 py-8 flex-grow perspective-1000">
           {!isLoaded ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Skeleton className="h-80 w-full" />
-              <Skeleton className="h-80 w-full" />
-              <Skeleton className="h-80 w-full" />
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+              <Skeleton className="h-80 w-full rounded-[2rem] shadow-3d animate-pulse" />
+              <Skeleton className="h-80 w-full rounded-[2rem] shadow-3d animate-pulse" />
+              <Skeleton className="h-80 w-full rounded-[2rem] shadow-3d animate-pulse" />
             </div>
           ) : subjects.length > 0 ? (
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 preserve-3d">
               {subjects.map(subject => (
-                <SubjectCard
-                  key={subject.id}
-                  subject={subject}
-                  onUpdate={updateSubject}
-                  onDelete={deleteSubject}
-                  onPresent={handlePresent}
-                  onAbsent={handleAbsent}
-                  onUpdateAttendanceStatus={updateAttendanceStatus}
-                />
+                <div key={subject.id} className="card-3d">
+                  <SubjectCard
+                    subject={subject}
+                    onUpdate={updateSubject}
+                    onDelete={deleteSubject}
+                    onPresent={() => handlePresent(subject.id)}
+                    onAbsent={() => handleAbsent(subject.id)}
+                    onStatusUpdate={(status) => updateAttendanceStatus(subject.id, status)}
+                  />
+                </div>
               ))}
             </div>
           ) : (
@@ -101,84 +108,97 @@ function LandingPage() {
         </div>
       </nav>
 
+      {/* Floating 3D Background Elements */}
+      <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[10%] w-72 h-72 bg-primary/10 rounded-full blur-[120px] animate-float-3d" />
+        <div className="absolute bottom-[20%] right-[10%] w-96 h-96 bg-primary/5 rounded-full blur-[150px] animate-float-3d" style={{ animationDelay: '-2s' }} />
+        <div className="absolute top-[40%] right-[20%] w-64 h-64 bg-secondary rounded-full blur-[100px] animate-float-3d" style={{ animationDelay: '-4s' }} />
+      </div>
+
       {/* Hero Section */}
-      <header className="container mx-auto mt-20 px-6 text-center">
-        <h1 className="text-5xl font-extrabold tracking-tight md:text-7xl">
-          Attendance Tracker <span className="text-primary">for Students</span>
-        </h1>
-        <div className="mx-auto mt-6 max-w-3xl">
-          <p className="text-xl text-muted-foreground md:text-2xl leading-relaxed">
-            Class Track is a free, simple attendance tracker that helps students monitor their 
-            class attendance percentage and manage subjects easily. Stay ahead of your attendance 
-            goals and never worry about debarment again.
-          </p>
+      <header className="container mx-auto mt-20 px-6 text-center perspective-1000">
+        <div className="preserve-3d transition-transform duration-1000">
+          <h1 className="text-5xl font-extrabold tracking-tight md:text-7xl mb-6 shadow-3d-primary py-2 px-4 rounded-3xl inline-block bg-background/50 backdrop-blur-sm border border-border/50 translate-z-10">
+            Attendance Tracker <span className="text-primary italic">for Students</span>
+          </h1>
+          <div className="mx-auto mt-6 max-w-3xl glass-3d p-8 rounded-[2.5rem] card-3d">
+            <p className="text-xl text-muted-foreground md:text-2xl leading-relaxed">
+              Class Track is a free, simple attendance tracker that helps students monitor their 
+              class attendance percentage and manage subjects easily. Stay ahead of your attendance 
+              goals and never worry about debarment again.
+            </p>
+          </div>
         </div>
-        <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-center gap-6 sm:flex-row preserve-3d">
           <Link href="/login">
-            <Button size="lg" className="px-8 py-6 text-lg">Start Tracking Now</Button>
+            <Button size="lg" className="px-10 py-7 text-xl rounded-2xl shadow-3d-primary hover:scale-105 transition-all duration-300 active:scale-95">
+              Start Tracking Now
+            </Button>
           </Link>
           <Link href="/attendance-tracker">
-            <Button size="lg" variant="outline" className="px-8 py-6 text-lg">Learn More</Button>
+            <Button size="lg" variant="outline" className="px-10 py-7 text-xl rounded-2xl glass-3d hover:bg-secondary/50 transition-all duration-300">
+              Learn More
+            </Button>
           </Link>
         </div>
       </header>
 
       {/* How it Works Section - PROMOTES TEXT CONTENT */}
-      <section className="container mx-auto mt-32 px-6">
+      <section className="container mx-auto mt-32 px-6 perspective-1000">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold md:text-4xl mb-4">How our Attendance Tracker Works</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <h2 className="text-4xl font-black mb-4 tracking-tight">How our <span className="text-primary italic">3D Tracker</span> Works</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
             Designed for simplicity and speed. Get started in less than a minute.
           </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
-          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
-            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">1</div>
-            <h3 className="text-xl font-bold mb-3">Add Your Subjects</h3>
-            <p className="text-muted-foreground">Input the names of all your current classes. You can even set target attendance goals.</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+          <div className="p-10 rounded-[2.5rem] bg-secondary/30 border border-border/50 card-3d shadow-3d group">
+            <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-8 shadow-3d-primary group-hover:scale-110 transition-transform">1</div>
+            <h3 className="text-2xl font-bold mb-4">Add Your Subjects</h3>
+            <p className="text-muted-foreground text-lg">Input the names of all your current classes. You can even set target attendance goals.</p>
           </div>
-          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
-            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">2</div>
-            <h3 className="text-xl font-bold mb-3">Mark Attendance</h3>
-            <p className="text-muted-foreground">With just one tap, update whether you were present or absent after every lecture.</p>
+          <div className="p-10 rounded-[2.5rem] bg-secondary/30 border border-border/50 card-3d shadow-3d group" style={{ transitionDelay: '100ms' }}>
+            <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-8 shadow-3d-primary group-hover:scale-110 transition-transform">2</div>
+            <h3 className="text-2xl font-bold mb-4">Mark Attendance</h3>
+            <p className="text-muted-foreground text-lg">With just one tap, update whether you were present or absent after every lecture.</p>
           </div>
-          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
-            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">3</div>
-            <h3 className="text-xl font-bold mb-3">Stay eligible</h3>
-            <p className="text-muted-foreground">Our smart bunk calculator tells you exactly how many more classes you can safely miss.</p>
+          <div className="p-10 rounded-[2.5rem] bg-secondary/30 border border-border/50 card-3d shadow-3d group" style={{ transitionDelay: '200ms' }}>
+            <div className="w-16 h-16 bg-primary text-primary-foreground rounded-2xl flex items-center justify-center text-2xl font-black mx-auto mb-8 shadow-3d-primary group-hover:scale-110 transition-transform">3</div>
+            <h3 className="text-2xl font-bold mb-4">Stay Eligible</h3>
+            <p className="text-muted-foreground text-lg">Our smart bunk calculator tells you exactly how many more classes you can safely miss.</p>
           </div>
         </div>
       </section>
 
-      {/* Feature Section */}
-      <section className="container mx-auto mt-32 px-6">
-        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LayoutDashboard size={32} />
+      {/* Feature Section with Perspective */}
+      <section className="container mx-auto mt-40 px-6">
+        <div className="grid grid-cols-1 gap-16 md:grid-cols-3">
+          <div className="flex flex-col items-center text-center p-8 glass-3d rounded-3xl card-3d">
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary/10 text-primary animate-float-3d shadow-3d">
+              <LayoutDashboard size={40} />
             </div>
-            <h3 className="text-xl font-bold">Subject Management</h3>
-            <p className="mt-2 text-muted-foreground">
+            <h3 className="text-2xl font-bold mb-3">Subject Management</h3>
+            <p className="text-muted-foreground text-lg leading-relaxed">
               Add all your subjects and manage them in one place with a beautiful, 
               modern dashboard designed for university students.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LineChart size={32} />
+          <div className="flex flex-col items-center text-center p-8 glass-3d rounded-3xl card-3d" style={{ animationDelay: '-1s' }}>
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary/10 text-primary animate-float-3d shadow-3d">
+              <LineChart size={40} />
             </div>
-            <h3 className="text-xl font-bold">Smart Insights</h3>
-            <p className="mt-2 text-muted-foreground">
+            <h3 className="text-2xl font-bold mb-3">Smart Insights</h3>
+            <p className="text-muted-foreground text-lg leading-relaxed">
               Know exactly how many classes you can miss or need to attend to 
               reach your 75% or 85% attendance requirement.
             </p>
           </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <ShieldCheck size={32} />
+          <div className="flex flex-col items-center text-center p-8 glass-3d rounded-3xl card-3d" style={{ animationDelay: '-2s' }}>
+            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-[2rem] bg-primary/10 text-primary animate-float-3d shadow-3d">
+              <ShieldCheck size={40} />
             </div>
-            <h3 className="text-xl font-bold">Privacy First</h3>
-            <p className="mt-2 text-muted-foreground">
+            <h3 className="text-2xl font-bold mb-3">Privacy First</h3>
+            <p className="text-muted-foreground text-lg leading-relaxed">
               Your data is secure with Firebase authentication. Use it as a private 
               <strong> student attendance tracker</strong> that only you can see.
             </p>
@@ -186,12 +206,13 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* SEO Content Section - HEAVY TEXT FOR ADSENSE */}
-      <section className="mt-32 bg-secondary/30 py-24 border-y">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold leading-tight md:text-4xl mb-8">
-              Why use an online attendance tracker for students?
+      {/* SEO Content Section - HEAVY TEXT FOR ADSENSE with 3D Depth */}
+      <section className="mt-40 bg-secondary/30 py-32 border-y relative perspective-1000">
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="max-w-5xl mx-auto glass-3d p-12 md:p-20 rounded-[3rem] shadow-3d card-3d">
+            <h2 className="text-4xl font-extrabold leading-tight md:text-5xl mb-10 tracking-tight">
+              Why use an <span className="text-primary italic underline decoration-primary/20">online</span> attendance tracker?
             </h2>
             <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
               <p>

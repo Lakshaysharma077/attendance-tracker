@@ -67,3 +67,54 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+  }
+  .rotate-y-12 {
+    transform: rotateY(12deg);
+  }
+  .rotate-x-12 {
+    transform: rotateX(12deg);
+  }
+  .shadow-3d {
+    box-shadow: 
+      0 1px 1px hsl(0deg 0% 0% / 0.075),
+      0 2px 2px hsl(0deg 0% 0% / 0.075),
+      0 4px 4px hsl(0deg 0% 0% / 0.075),
+      0 8px 8px hsl(0deg 0% 0% / 0.075),
+      0 16px 16px hsl(0deg 0% 0% / 0.075);
+  }
+  .shadow-3d-primary {
+    box-shadow: 
+      0 20px 50px -12px rgba(99, 102, 241, 0.5);
+  }
+  .glass-3d {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 shadow-3d;
+  }
+  .hover-3d:hover {
+    transform: translateY(-10px) rotateX(10deg) rotateY(10deg);
+    @apply shadow-2xl;
+  }
+  .animate-float-3d {
+    animation: float3d 6s ease-in-out infinite;
+  }
+  @keyframes float3d {
+    0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
+    50% { transform: translateY(-20px) rotateX(10deg) rotateY(-5deg); }
+  }
+  .card-3d {
+    @apply transition-all duration-500 ease-out preserve-3d;
+  }
+  .card-3d:hover {
+    transform: perspective(1000px) rotateX(4deg) rotateY(-4deg) translateY(-5px);
+    @apply shadow-2xl;
+  }
+}

@@ -51,7 +51,7 @@ type SubjectCardProps = {
   onDelete: (id: string) => void;
   onPresent: (id: string) => void;
   onAbsent: (id: string) => void;
-  onUpdateAttendanceStatus: (
+  onStatusUpdate: (
     subjectId: string,
     attendanceId: string,
     oldStatus: 'present' | 'absent'
@@ -64,7 +64,7 @@ export function SubjectCard({
   onDelete,
   onPresent,
   onAbsent,
-  onUpdateAttendanceStatus,
+  onStatusUpdate,
 }: SubjectCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -77,14 +77,14 @@ export function SubjectCard({
     const requirement = subject.requirement;
 
     let status: 'safe' | 'borderline' | 'danger' = 'danger';
-    let progressColor = 'bg-destructive';
+    let progressColor = 'bg-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)]';
 
     if (percentage >= requirement) {
       status = 'safe';
-      progressColor = 'bg-primary';
+      progressColor = 'bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]';
     } else if (percentage >= requirement - 5) {
       status = 'borderline';
-      progressColor = 'bg-yellow-500';
+      progressColor = 'bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]';
     }
     return { total, percentage, status, progressColor };
   }, [subject]);
@@ -100,14 +100,17 @@ export function SubjectCard({
 
   return (
     <>
-      <Card>
-        <CardHeader className="flex-row items-start justify-between">
-          <div>
-            <CardTitle className="text-xl font-bold">
+      <Card className="glass-3d rounded-[2.5rem] border-white/40 overflow-hidden relative preserve-3d">
+        <div className="absolute top-0 right-0 p-2 opacity-20 pointer-events-none">
+          <BookOpen className="h-24 w-24 -mr-8 -mt-8 rotate-12" />
+        </div>
+        <CardHeader className="flex-row items-start justify-between pb-2">
+          <div className="translate-z-10">
+            <CardTitle className="text-2xl font-black tracking-tight text-foreground">
               {subject.name}
             </CardTitle>
             {subject.teacher && (
-              <CardDescription className="flex items-center pt-1">
+              <CardDescription className="flex items-center pt-1 font-medium italic">
                 <User className="mr-1.5 h-3 w-3" />
                 {subject.teacher}
               </CardDescription>
@@ -115,56 +118,58 @@ export function SubjectCard({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-                <MoreVertical className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-xl hover:bg-white/20 transition-colors">
+                <MoreVertical className="h-5 w-5" />
                 <span className="sr-only">More options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+            <DropdownMenuContent align="end" className="glass-3d border-white/20 rounded-2xl">
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="rounded-xl">
                 <Edit className="mr-2 h-4 w-4" />
                 <span>Edit</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-destructive focus:text-destructive"
+                className="text-destructive focus:text-destructive rounded-xl"
               >
-                <Trash2 className="mr-2 h-4 w-4" />
+                < Trash2 className="mr-2 h-4 w-4" />
                 <span>Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent className="flex-grow space-y-6">
-          <div className="text-center">
+        <CardContent className="flex-grow space-y-8 pt-4 translate-z-20">
+          <div className="text-center relative">
+            <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 -z-10 animate-pulse" />
             <p
               className={cn(
-                'text-5xl font-bold',
+                'text-6xl font-black tracking-tighter drop-shadow-2xl',
                 {
                   'text-primary': status === 'safe',
-                  'text-yellow-500': status === 'borderline',
+                  'text-yellow-600': status === 'borderline',
                   'text-destructive': status === 'danger',
-                },
-                'font-sans'
+                }
               )}
             >
-              {percentage.toFixed(1)}
-              <span className="text-3xl">%</span>
+              {percentage.toFixed(0)}
+              <span className="text-3xl ml-0.5">%</span>
             </p>
-            <p className="text-sm text-muted-foreground">
-              {subject.present} present out of {total} classes
+            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">
+              {subject.present} / {total} Lectures
             </p>
           </div>
-          <div className="space-y-2">
-            <Progress
-              value={percentage}
-              className={cn('h-2', progressColor)}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="space-y-3">
+            <div className="h-3 w-full bg-slate-200/50 rounded-full overflow-hidden border border-white/20">
+              <div 
+                className={cn('h-full transition-all duration-1000 ease-out rounded-full', progressColor)} 
+                style={{ width: `${percentage}%` }}
+              />
+            </div>
+            <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-tighter">
               <span>0%</span>
-              <div className="flex items-center">
+              <div className="flex items-center bg-white/30 px-2 py-0.5 rounded-full border border-white/40">
                 <TrendingUp className="mr-1 h-3 w-3" />
-                <span>{subject.requirement}% required</span>
+                <span>Goal: {subject.requirement}%</span>
               </div>
               <span>100%</span>
             </div>
@@ -173,37 +178,38 @@ export function SubjectCard({
             <Button
               variant="outline"
               onClick={() => onAbsent(subject.id)}
+              className="h-14 rounded-2xl glass-3d border-white/40 hover:bg-destructive/10 text-destructive font-bold transition-all active:scale-95 shadow-lg"
             >
-              <Minus className="mr-2 h-4 w-4" /> Absent
+              <Minus className="mr-2 h-5 w-5" /> Absent
             </Button>
             <Button
               onClick={() => onPresent(subject.id)}
+              className="h-14 rounded-2xl bg-primary text-primary-foreground font-bold shadow-3d-primary hover:scale-[1.02] transition-all active:scale-95 border-t border-white/20"
             >
-              <Plus className="mr-2 h-4 w-4" /> Present
+              <Plus className="mr-2 h-5 w-5" /> Present
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex-col items-start gap-2">
+        <CardFooter className="flex-col items-start gap-4 pt-4 border-t border-white/10 bg-white/5 backdrop-blur-sm">
           <MissableClassesInfo subject={subject} />
           <div className="flex w-full items-center justify-between">
             {subject.lastUpdated ? (
-              <p className="text-xs text-muted-foreground">
-                Last updated{' '}
-                {formatDistanceToNow(new Date(subject.lastUpdated), {
+              <p className="text-[10px] font-bold text-muted-foreground italic">
+                ⏱ {formatDistanceToNow(new Date(subject.lastUpdated), {
                   addSuffix: true,
                 })}
               </p>
             ) : (
-              <div /> // Placeholder for spacing
+              <div />
             )}
             <Button
               variant="link"
               size="sm"
-              className="h-auto p-0 text-xs"
+              className="h-auto p-0 text-[10px] font-black uppercase tracking-tighter hover:text-primary transition-colors"
               onClick={() => setIsReportDialogOpen(true)}
             >
               <FileText className="mr-1 h-3 w-3" />
-              View Report
+              Full History
             </Button>
           </div>
         </CardFooter>
