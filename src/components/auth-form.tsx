@@ -47,6 +47,48 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
   </svg>
 );
 
+interface PasswordInputProps {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}
+
+const PasswordInput = ({ id, value, onChange, disabled }: PasswordInputProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? 'text' : 'password'}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        required
+        disabled={disabled}
+        className="pr-10"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
+        onClick={() => setShowPassword(!showPassword)}
+        tabIndex={-1}
+      >
+        {showPassword ? (
+          <EyeOff className="h-4 w-4 text-muted-foreground" />
+        ) : (
+          <Eye className="h-4 w-4 text-muted-foreground" />
+        )}
+        <span className="sr-only">
+          {showPassword ? 'Hide password' : 'Show password'}
+        </span>
+      </Button>
+    </div>
+  );
+};
+
 export function AuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -54,7 +96,6 @@ export function AuthForm() {
   const [isResetLoading, setIsResetLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('signin');
 
   const auth = useAuth();
@@ -227,42 +268,6 @@ export function AuthForm() {
     }
   };
 
-  const PasswordInput = ({
-    id,
-    disabled,
-  }: {
-    id: string;
-    disabled: boolean;
-  }) => (
-    <div className="relative">
-      <Input
-        id={id}
-        type={showPassword ? 'text' : 'password'}
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        required
-        disabled={disabled}
-        className="pr-10"
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="absolute right-0 top-0 h-full w-10 hover:bg-transparent"
-        onClick={() => setShowPassword(!showPassword)}
-        tabIndex={-1}
-      >
-        {showPassword ? (
-          <EyeOff className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <Eye className="h-4 w-4 text-muted-foreground" />
-        )}
-        <span className="sr-only">
-          {showPassword ? 'Hide password' : 'Show password'}
-        </span>
-      </Button>
-    </div>
-  );
 
   return (
     <Card className="w-full max-w-sm">
@@ -315,7 +320,12 @@ export function AuthForm() {
                       Forgot Password?
                     </Button>
                   </div>
-                  <PasswordInput id="password-signin" disabled={isLoading} />
+                  <PasswordInput 
+                    id="password-signin" 
+                    value={password} 
+                    onChange={setPassword} 
+                    disabled={isLoading} 
+                  />
                 </div>
                 <Button
                   type="submit"
@@ -347,7 +357,12 @@ export function AuthForm() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="password-signup">Password</Label>
-                  <PasswordInput id="password-signup" disabled={isLoading} />
+                  <PasswordInput 
+                    id="password-signup" 
+                    value={password} 
+                    onChange={setPassword} 
+                    disabled={isLoading} 
+                  />
                 </div>
                 <Button
                   type="submit"
