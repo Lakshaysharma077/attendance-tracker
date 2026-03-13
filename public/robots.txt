@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://class-track.live/sitemap.xml
