@@ -37,7 +37,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, AlertTriangle } from 'lucide-react';
-import { useUser } from '@/firebase/auth/use-user';
+import { useUser } from '@/firebase';
 import { useAttendanceHistory } from '@/hooks/use-attendance-history';
 import type { Subject, AttendanceRecord } from '@/lib/types';
 import { format } from 'date-fns';

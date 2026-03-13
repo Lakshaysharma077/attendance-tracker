@@ -8,7 +8,7 @@ import { AddSubjectDialog } from '@/components/add-subject-dialog';
 import { useState, useEffect } from 'react';
 import { BookOpen, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useUser } from '@/firebase/auth/use-user';
+import { useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
