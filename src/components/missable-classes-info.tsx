@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { calculateClassesMissed } from '@/ai/flows/calculate-classes-missed';
+import { calculateClassesMissed } from '@/lib/calculations';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
