@@ -87,9 +87,6 @@ export default function AttendancePercentageCalculatorPage() {
         </div>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground mt-20">
-        <p>&copy; {new Date().getFullYear()} ClassTrack. The #1 Student Attendance Tool.</p>
-      </footer>
     </div>
   );
 }

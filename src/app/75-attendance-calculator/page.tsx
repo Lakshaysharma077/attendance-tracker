@@ -106,9 +106,6 @@ export default function Attendance75Page() {
         </article>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground mt-20">
-        <p>&copy; {new Date().getFullYear()} ClassTrack - The Ultimate 75% Attendance Helper.</p>
-      </footer>
     </div>
   );
 }

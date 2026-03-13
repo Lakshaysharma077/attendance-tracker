@@ -103,14 +103,6 @@ export default function BunkCalculatorPage() {
         </div>
       </main>
 
-      <footer className="py-12 text-center text-muted-foreground text-sm">
-        <div className="flex justify-center gap-6 mb-4">
-          <Link href="/privacy-policy" className="hover:text-primary underline-offset-4 hover:underline">Privacy</Link>
-          <Link href="/terms-and-conditions" className="hover:text-primary underline-offset-4 hover:underline">Terms</Link>
-          <Link href="/contact" className="hover:text-primary underline-offset-4 hover:underline">Contact</Link>
-        </div>
-        <p>&copy; {new Date().getFullYear()} ClassTrack - Smart Bunk Calculation.</p>
-      </footer>
     </div>
   );
 }

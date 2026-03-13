@@ -82,9 +82,6 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} ClassTrack. Helping students succeed.</p>
-      </footer>
     </div>
   );
 }

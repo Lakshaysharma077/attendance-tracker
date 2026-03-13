@@ -98,9 +98,6 @@ export default function HowToCalculatePage() {
         </article>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground mt-20">
-        <p>&copy; {new Date().getFullYear()} ClassTrack - Educational Guides for Students.</p>
-      </footer>
     </div>
   );
 }

@@ -72,9 +72,6 @@ export default function ContactPage() {
         </div>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} ClassTrack. Always here to help.</p>
-      </footer>
     </div>
   );
 }

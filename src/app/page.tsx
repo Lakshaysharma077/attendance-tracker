@@ -250,36 +250,6 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* CTA Footer */}
-      <footer className="container mx-auto mt-32 border-t py-16 px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
-          <div>
-            <div className="text-2xl font-bold text-foreground">ClassTrack</div>
-            <p className="mt-4 text-muted-foreground">Smart attendance tracking and calculations for modern college students.</p>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 text-foreground uppercase tracking-wider text-sm">Tools</h4>
-            <ul className="space-y-4 text-muted-foreground">
-              <li><Link href="/attendance-tracker" className="hover:text-primary transition-colors">Attendance Tracker</Link></li>
-              <li><Link href="/class-attendance-calculator" className="hover:text-primary transition-colors">Calculator</Link></li>
-              <li><Link href="/bunk-calculator" className="hover:text-primary transition-colors">Bunk Calculator</Link></li>
-              <li><Link href="/attendance-percentage-calculator" className="hover:text-primary transition-colors">Percentage Calculator</Link></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 text-foreground uppercase tracking-wider text-sm">Legal & Help</h4>
-            <ul className="space-y-4 text-muted-foreground">
-              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Support</Link></li>
-              <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms-and-conditions" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-            </ul>
-          </div>
-        </div>
-        <div className="text-center text-muted-foreground pt-8 border-t">
-          <p>&copy; {new Date().getFullYear()} ClassTrack. All Rights Reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }

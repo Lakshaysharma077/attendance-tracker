@@ -50,9 +50,6 @@ export default function TermsPage() {
         </section>
       </main>
 
-      <footer className="border-t py-12 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} ClassTrack. All rights reserved.</p>
-      </footer>
     </div>
   );
 }
