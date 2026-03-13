@@ -84,7 +84,13 @@ function LandingPage() {
     <div className="min-h-screen bg-background">
       {/* Navigation */}
       <nav className="container mx-auto flex items-center justify-between p-6">
-        <div className="text-2xl font-bold tracking-tighter text-primary">ClassTrack</div>
+        <Link href="/" className="text-2xl font-bold tracking-tighter text-primary">ClassTrack</Link>
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/attendance-tracker" className="text-sm font-medium hover:text-primary transition-colors">App</Link>
+          <Link href="/class-attendance-calculator" className="text-sm font-medium hover:text-primary transition-colors">Calculator</Link>
+          <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
+          <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
+        </div>
         <div className="flex items-center gap-4">
           <Link href="/login">
             <Button variant="ghost">Sign In</Button>
@@ -100,10 +106,13 @@ function LandingPage() {
         <h1 className="text-5xl font-extrabold tracking-tight md:text-7xl">
           Attendance Tracker <span className="text-primary">for Students</span>
         </h1>
-        <h2 className="mx-auto mt-6 max-w-2xl text-xl text-muted-foreground md:text-2xl">
-          Track Your Class Attendance Easily. Class Track is a simple attendance tracker that 
-          helps students monitor their class attendance percentage and manage subjects easily.
-        </h2>
+        <div className="mx-auto mt-6 max-w-3xl">
+          <p className="text-xl text-muted-foreground md:text-2xl leading-relaxed">
+            Class Track is a free, simple attendance tracker that helps students monitor their 
+            class attendance percentage and manage subjects easily. Stay ahead of your attendance 
+            goals and never worry about debarment again.
+          </p>
+        </div>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link href="/login">
             <Button size="lg" className="px-8 py-6 text-lg">Start Tracking Now</Button>
@@ -113,6 +122,33 @@ function LandingPage() {
           </Link>
         </div>
       </header>
+
+      {/* How it Works Section - PROMOTES TEXT CONTENT */}
+      <section className="container mx-auto mt-32 px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl font-bold md:text-4xl mb-4">How our Attendance Tracker Works</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Designed for simplicity and speed. Get started in less than a minute.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
+            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">1</div>
+            <h3 className="text-xl font-bold mb-3">Add Your Subjects</h3>
+            <p className="text-muted-foreground">Input the names of all your current classes. You can even set target attendance goals.</p>
+          </div>
+          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
+            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">2</div>
+            <h3 className="text-xl font-bold mb-3">Mark Attendance</h3>
+            <p className="text-muted-foreground">With just one tap, update whether you were present or absent after every lecture.</p>
+          </div>
+          <div className="p-8 rounded-3xl bg-secondary/50 border border-border/50">
+            <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-6">3</div>
+            <h3 className="text-xl font-bold mb-3">Stay eligible</h3>
+            <p className="text-muted-foreground">Our smart bunk calculator tells you exactly how many more classes you can safely miss.</p>
+          </div>
+        </div>
+      </section>
 
       {/* Feature Section */}
       <section className="container mx-auto mt-32 px-6">
@@ -124,7 +160,7 @@ function LandingPage() {
             <h3 className="text-xl font-bold">Subject Management</h3>
             <p className="mt-2 text-muted-foreground">
               Add all your subjects and manage them in one place with a beautiful, 
-              modern dashboard designed for students.
+              modern dashboard designed for university students.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -134,7 +170,7 @@ function LandingPage() {
             <h3 className="text-xl font-bold">Smart Insights</h3>
             <p className="mt-2 text-muted-foreground">
               Know exactly how many classes you can miss or need to attend to 
-              reach your attendance requirement.
+              reach your 75% or 85% attendance requirement.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -143,48 +179,50 @@ function LandingPage() {
             </div>
             <h3 className="text-xl font-bold">Privacy First</h3>
             <p className="mt-2 text-muted-foreground">
-              Your data is secure with Firebase authentication. Use it as a personal 
-              student attendance tracker.
+              Your data is secure with Firebase authentication. Use it as a private 
+              <strong> student attendance tracker</strong> that only you can see.
             </p>
           </div>
         </div>
       </section>
 
-      {/* SEO Content Section */}
-      <section className="mt-32 bg-secondary py-24">
+      {/* SEO Content Section - HEAVY TEXT FOR ADSENSE */}
+      <section className="mt-32 bg-secondary/30 py-24 border-y">
         <div className="container mx-auto px-6">
-          <div className="max-w-3xl">
-            <h2 className="text-3xl font-bold leading-tight md:text-4xl">
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold leading-tight md:text-4xl mb-8">
               Why use an online attendance tracker for students?
             </h2>
-            <div className="mt-8 space-y-6 text-lg text-muted-foreground">
+            <div className="space-y-6 text-lg text-muted-foreground leading-relaxed">
               <p>
-                Managing college attendance can be stressful. With Class Track, you no longer need 
-                to maintain manual logs or simple spreadsheets. Our platform acts as a dedicated 
-                <strong> student attendance tracker</strong> that calculates your percentages in real-time.
+                Managing academic performance and college attendance at the same time can be incredibly stressful.
+                With tight schedules and strict university regulations, missing even one extra class can 
+                result in being debarred from final exams. With Class Track, you no longer need 
+                to maintain manual logs or messy paper spreadsheets. 
               </p>
               <p>
-                Whether you're looking for an <strong>attendance percentage calculator</strong> or 
-                a way to <strong>track class attendance online</strong>, Class Track provides 
-                the smartest solution. It's built for students who want to stay on top of their 
-                academic requirements without the hassle.
+                Our platform acts as a dedicated <strong>student attendance tracker</strong> that calculates 
+                your percentages in real-time. Whether you are using a <strong>bunk calculator</strong> 
+                to plan your next holiday or a <strong>75 percent attendance calculator</strong> to recover 
+                from an illness, Class Track provides the smartest solution accessible from any device.
               </p>
+              <h3 className="text-2xl font-bold text-foreground pt-4">Benefits of Class Track:</h3>
               <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span>Free and easy to use</span>
+                  <span>Free and easy to use globally</span>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span>Mobile-friendly UI</span>
+                  <span>Cloud-synced for mobile access</span>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span>Works for any subject</span>
+                  <span>Works for any subject or course</span>
                 </li>
-                <li className="flex items-center gap-2">
+                <li className="flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span>Real-time calculation</span>
+                  <span>Instantly calculate attendance %</span>
                 </li>
               </ul>
             </div>
@@ -192,14 +230,54 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ Section - CRITICAL FOR SEO */}
+      <section className="container mx-auto mt-32 px-6 max-w-4xl">
+        <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+        <div className="space-y-8">
+          <div className="bg-card p-8 rounded-2xl border">
+            <h3 className="text-xl font-bold mb-3">How do I calculate attendance percentage?</h3>
+            <p className="text-muted-foreground italic">Attendance % = (Classes Attended / Total Classes Conducted) × 100.</p>
+            <p className="mt-2 text-muted-foreground">Class Track does this automatically for every subject you add.</p>
+          </div>
+          <div className="bg-card p-8 rounded-2xl border">
+            <h3 className="text-xl font-bold mb-3">Is this student attendance tracker free?</h3>
+            <p className="text-muted-foreground">Yes! ClassTrack is 100% free for all students. We are funded by high-quality non-intrusive ads from partners like Google AdSense to keep the service running.</p>
+          </div>
+          <div className="bg-card p-8 rounded-2xl border">
+            <h3 className="text-xl font-bold mb-3">Will my data be secure?</h3>
+            <p className="text-muted-foreground">Absolutely. We use Firebase's industry-standard authentication and database to ensure that only you can access your attendance data.</p>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Footer */}
-      <footer className="container mx-auto border-t py-12 text-center text-muted-foreground">
-        <div className="text-lg font-bold text-foreground">ClassTrack</div>
-        <p className="mt-2">&copy; {new Date().getFullYear()} Smart Attendance Tracking for Students.</p>
-        <div className="mt-4 flex justify-center gap-6">
-          <Link href="/attendance-tracker" className="hover:text-primary">Attendance Tracker</Link>
-          <Link href="/class-attendance-calculator" className="hover:text-primary">Calculator</Link>
-          <Link href="/student-attendance-tracker" className="hover:text-primary">Student Tracker</Link>
+      <footer className="container mx-auto mt-32 border-t py-16 px-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
+          <div>
+            <div className="text-2xl font-bold text-foreground">ClassTrack</div>
+            <p className="mt-4 text-muted-foreground">Smart attendance tracking and calculations for modern college students.</p>
+          </div>
+          <div>
+            <h4 className="font-bold mb-6 text-foreground uppercase tracking-wider text-sm">Tools</h4>
+            <ul className="space-y-4 text-muted-foreground">
+              <li><Link href="/attendance-tracker" className="hover:text-primary transition-colors">Attendance Tracker</Link></li>
+              <li><Link href="/class-attendance-calculator" className="hover:text-primary transition-colors">Calculator</Link></li>
+              <li><Link href="/bunk-calculator" className="hover:text-primary transition-colors">Bunk Calculator</Link></li>
+              <li><Link href="/attendance-percentage-calculator" className="hover:text-primary transition-colors">Percentage Calculator</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-bold mb-6 text-foreground uppercase tracking-wider text-sm">Legal & Help</h4>
+            <ul className="space-y-4 text-muted-foreground">
+              <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
+              <li><Link href="/contact" className="hover:text-primary transition-colors">Contact Support</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms-and-conditions" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="text-center text-muted-foreground pt-8 border-t">
+          <p>&copy; {new Date().getFullYear()} ClassTrack. All Rights Reserved.</p>
         </div>
       </footer>
     </div>

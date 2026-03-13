@@ -5,10 +5,12 @@ import { FirebaseClientProvider } from '@/firebase';
 import { Analytics } from "@vercel/analytics/next"
 import Script from 'next/script';
 
+import { Footer } from '@/components/footer';
+
 export const metadata: Metadata = {
   title: 'Class Track - Smart Attendance Tracker for Students & Teachers',
   description: 'Track your class attendance easily with Class Track. A simple attendance tracker for students to monitor attendance percentage and manage classes.',
-  keywords: ['class tracker', 'attendance tracker', 'student attendance tracker', 'attendance percentage calculator'],
+  keywords: ['class tracker', 'attendance tracker', 'student attendance tracker', 'attendance percentage calculator', 'bunk calculator', '75 attendance calculator'],
 };
 
 export default function RootLayout({
@@ -26,9 +28,12 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
       </head>
-      <body className="antialiased">
+      <body className="antialiased flex flex-col min-h-screen">
         <FirebaseClientProvider>
-          {children}
+          <div className="flex-grow">
+            {children}
+          </div>
+          <Footer />
           <Toaster />
         </FirebaseClientProvider>
         <Analytics />
