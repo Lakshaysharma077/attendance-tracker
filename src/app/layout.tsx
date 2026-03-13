@@ -18,18 +18,20 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="light">
-      <body className="antialiased">
-        <FirebaseClientProvider>
-          {children}
-          <Toaster />
-        </FirebaseClientProvider>
-        <Analytics />
+      <head>
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3555162840825683"
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
+      </head>
+      <body className="antialiased">
+        <FirebaseClientProvider>
+          {children}
+          <Toaster />
+        </FirebaseClientProvider>
+        <Analytics />
       </body>
     </html>
   );
