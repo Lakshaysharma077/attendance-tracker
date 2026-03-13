@@ -61,16 +61,15 @@ export function MissableClassesInfo({ subject }: Props) {
       ? AlertCircle
       : Info;
   const colorClass = cn({
-    'text-chart-2': result.type === 'success',
-    'text-chart-4': result.type === 'warning',
+    'text-slate-600': result.type === 'success' || result.type === 'info',
+    'text-yellow-600': result.type === 'warning',
     'text-destructive': result.type === 'danger',
-    'text-muted-foreground': result.type === 'info',
   });
 
   return (
-    <div className={cn('flex items-center text-sm', colorClass)}>
-      <Icon className="mr-2 h-4 w-4 shrink-0" />
-      <span className="font-medium">{result.message}</span>
+    <div className={cn('flex items-center text-[10px] uppercase tracking-wider', colorClass)}>
+      <Icon className="mr-1.5 h-3 w-3 shrink-0" />
+      <span className="font-bold">{result.message}</span>
     </div>
   );
 }

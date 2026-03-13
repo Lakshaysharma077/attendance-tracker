@@ -38,56 +38,55 @@ export function AppHeader({ onAddSubject }: AppHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200 transition-all duration-300">
-      <div className="container mx-auto px-6 max-w-7xl">
-        <div className="flex h-16 items-center justify-between">
-          <div className="text-2xl font-black tracking-tighter text-slate-900 group cursor-default">
-            Class<span className="text-primary italic group-hover:not-italic transition-all">Track</span>
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-100 transition-all duration-300">
+      <div className="container mx-auto px-6 max-w-6xl">
+        <div className="flex h-14 items-center justify-between">
+          <div className="text-xl font-bold tracking-tight text-slate-900">
+            ClassTrack
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {user && (
               <Button 
                 size="sm" 
                 onClick={onAddSubject}
-                className="rounded-xl shadow-lg shadow-primary/10 hover:shadow-xl transition-all h-10 px-5 font-bold bg-primary hover:bg-primary/90"
+                className="rounded-lg h-9 px-4 font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors"
               >
-                <Plus className="mr-2 h-4 w-4" />
                 Add Subject
               </Button>
             )}
             {isLoading ? (
-              <Skeleton className="h-9 w-9 rounded-full" />
+              <Skeleton className="h-8 w-8 rounded-full" />
             ) : user && auth ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="relative h-10 w-10 rounded-full border border-slate-200 hover:bg-slate-50 transition-all p-0 overflow-hidden"
+                    className="relative h-8 w-8 rounded-full border border-slate-100 hover:bg-slate-50 transition-colors p-0 overflow-hidden"
                   >
                     <Avatar className="h-full w-full">
                       <AvatarImage
                         src={user.photoURL ?? ''}
                         alt={user.displayName ?? ''}
                       />
-                      <AvatarFallback className="font-bold bg-slate-100 text-slate-600">{getInitials(user.email)}</AvatarFallback>
+                      <AvatarFallback className="text-[10px] font-bold bg-slate-50 text-slate-400">{getInitials(user.email)}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-64 bg-white border border-slate-200 rounded-2xl p-1 shadow-2xl mt-2" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal p-4">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-bold text-slate-900 leading-none">
+                <DropdownMenuContent className="w-56 bg-white border border-slate-100 rounded-xl p-1 shadow-md mt-2" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal p-3">
+                    <div className="flex flex-col space-y-0.5">
+                      <p className="text-xs font-bold text-slate-900 leading-none">
                         {user.displayName || 'User'}
                       </p>
-                      <p className="text-xs text-slate-500 font-medium truncate">
+                      <p className="text-[10px] text-slate-400 font-medium truncate">
                         {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-100" />
-                  <DropdownMenuItem onClick={handleSignOut} className="rounded-xl m-1 focus:bg-destructive/5 focus:text-destructive text-slate-700 cursor-pointer">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span className="font-semibold">Log out</span>
+                  <DropdownMenuSeparator className="bg-slate-50" />
+                  <DropdownMenuItem onClick={handleSignOut} className="rounded-lg m-1 focus:bg-destructive/5 focus:text-destructive text-slate-600 cursor-pointer text-xs font-medium">
+                    <LogOut className="mr-2 h-3.5 w-3.5" />
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

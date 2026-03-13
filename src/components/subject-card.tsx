@@ -101,34 +101,34 @@ export function SubjectCard({
 
   return (
     <>
-      <Card className="card-premium h-full flex flex-col overflow-hidden relative group border-slate-200">
+      <Card className="bg-white hover:border-slate-300 transition-colors h-full flex flex-col overflow-hidden relative border-slate-200 shadow-sm">
         <CardHeader className="flex-row items-start justify-between pb-2 space-y-0">
           <div>
-            <CardTitle className="text-xl font-bold tracking-tight text-slate-900">
+            <CardTitle className="text-lg font-bold tracking-tight text-slate-900">
               {subject.name}
             </CardTitle>
             {subject.teacher && (
-              <CardDescription className="flex items-center pt-1 text-slate-500 font-medium">
-                <User className="mr-1.5 h-3 w-3" />
+              <CardDescription className="flex items-center pt-0.5 text-slate-500 font-medium text-xs">
+                <User className="mr-1 h-3 w-3" />
                 {subject.teacher}
               </CardDescription>
             )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-slate-100 transition-colors">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md hover:bg-slate-100 transition-colors">
                 <MoreVertical className="h-4 w-4 text-slate-400" />
                 <span className="sr-only">More options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-slate-200 p-1">
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="rounded-lg cursor-pointer">
+            <DropdownMenuContent align="end" className="rounded-lg shadow-md border-slate-200 p-1">
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="rounded-md cursor-pointer">
                 <Edit className="mr-2 h-4 w-4" />
                 <span>Edit</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
+                className="text-destructive focus:text-destructive rounded-md cursor-pointer"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Delete</span>
@@ -136,58 +136,53 @@ export function SubjectCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent className="flex-grow space-y-6 pt-4">
-          <div className="text-center">
+        <CardContent className="flex-grow space-y-5 pt-2">
+          <div className="text-left">
             <p
               className={cn(
-                'text-5xl font-extrabold tracking-tighter',
+                'text-4xl font-bold tracking-tight',
                 {
-                  'text-primary': status === 'safe',
+                  'text-slate-900': status === 'safe',
                   'text-yellow-600': status === 'borderline',
                   'text-destructive': status === 'danger',
                 }
               )}
             >
               {percentage.toFixed(0)}
-              <span className="text-2xl ml-0.5">%</span>
+              <span className="text-xl ml-0.5 font-medium">%</span>
             </p>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">
-              {subject.present} / {total} Lectures
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+              {subject.present} OF {total} ATTENDED
             </p>
           </div>
           <div className="space-y-2">
-            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
+            <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className={cn('h-full transition-all duration-700 ease-in-out rounded-full', progressColor)} 
+                className={cn('h-full transition-all duration-500 ease-out rounded-full', progressColor)} 
                 style={{ width: `${percentage}%` }}
               />
             </div>
             <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-              <span>0%</span>
-              <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 rounded-full border border-slate-100">
-                <TrendingUp className="h-3 w-3" />
-                <span>Goal: {subject.requirement}%</span>
-              </div>
-              <span>100%</span>
+              <span>Goal: {subject.requirement}%</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             <Button
               variant="outline"
               onClick={() => onAbsent(subject.id)}
-              className="h-11 rounded-xl border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-semibold shadow-sm"
+              className="h-10 rounded-lg border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-colors text-xs font-bold uppercase"
             >
-              <Minus className="mr-2 h-4 w-4" /> Absent
+              Absent
             </Button>
             <Button
               onClick={() => onPresent(subject.id)}
-              className="h-11 rounded-xl shadow-sm hover:shadow-md transition-all font-semibold bg-primary hover:bg-primary/90"
+              className="h-10 rounded-lg transition-colors text-xs font-bold uppercase bg-slate-900 hover:bg-slate-800 text-white"
             >
-              <Plus className="mr-2 h-4 w-4" /> Present
+              Present
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex-col items-start gap-4 pt-4 border-t border-slate-50 bg-slate-50/30">
+        <CardFooter className="flex-col items-start gap-3 pt-4 border-t border-slate-50">
           <MissableClassesInfo subject={subject} />
           <div className="flex w-full items-center justify-between">
             {subject.lastUpdated ? (

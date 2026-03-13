@@ -6,13 +6,13 @@ export function Footer() {
   return (
     <footer className="w-full border-t border-slate-200 bg-white py-20 px-6">
       <div className="container mx-auto max-w-7xl grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
-        <div className="space-y-6">
-          <div className="text-3xl font-black tracking-tighter text-slate-900 leading-none">
-            Class<span className="text-primary italic">Track</span>
+        <div className="space-y-4">
+          <div className="text-2xl font-bold tracking-tight text-slate-900">
+            ClassTrack
           </div>
-          <p className="text-slate-500 font-medium text-sm leading-relaxed max-w-xs">
-            Leading academic presence intelligence for modern students. 
-            Smart calculations, 100% free, and cloud-synced.
+          <p className="text-slate-500 font-medium text-xs leading-relaxed max-w-xs">
+            Simple and accurate attendance tracking for students. 
+            Free, secure, and cloud-synced.
           </p>
         </div>
         <div>
@@ -39,9 +39,9 @@ export function Footer() {
           </ul>
         </div>
       </div>
-      <div className="container mx-auto max-w-7xl text-center text-[10px] font-bold text-slate-400 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="uppercase tracking-widest">&copy; {new Date().getFullYear()} ClassTrack Intelligence Group.</p>
-        <p className="uppercase tracking-widest">Built for Academic Excellence Worldwide.</p>
+      <div className="container mx-auto max-w-6xl text-center text-[10px] font-bold text-slate-400 pt-8 border-t border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
+        <p className="uppercase tracking-widest">&copy; {new Date().getFullYear()} ClassTrack.</p>
+        <p className="uppercase tracking-widest">Built for Students.</p>
       </div>
     </footer>
   );
