@@ -39,6 +39,7 @@ import {
   Edit,
   Trash2,
   FileText,
+  BookOpen,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
@@ -77,14 +78,14 @@ export function SubjectCard({
     const requirement = subject.requirement;
 
     let status: 'safe' | 'borderline' | 'danger' = 'danger';
-    let progressColor = 'bg-destructive shadow-[0_0_15px_rgba(239,68,68,0.5)]';
+    let progressColor = 'bg-destructive';
 
     if (percentage >= requirement) {
       status = 'safe';
-      progressColor = 'bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]';
+      progressColor = 'bg-primary';
     } else if (percentage >= requirement - 5) {
       status = 'borderline';
-      progressColor = 'bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]';
+      progressColor = 'bg-yellow-500';
     }
     return { total, percentage, status, progressColor };
   }, [subject]);
@@ -100,17 +101,14 @@ export function SubjectCard({
 
   return (
     <>
-      <Card className="glass-3d rounded-[2.5rem] border-white/40 overflow-hidden relative preserve-3d">
-        <div className="absolute top-0 right-0 p-2 opacity-20 pointer-events-none">
-          <BookOpen className="h-24 w-24 -mr-8 -mt-8 rotate-12" />
-        </div>
-        <CardHeader className="flex-row items-start justify-between pb-2">
-          <div className="translate-z-10">
-            <CardTitle className="text-2xl font-black tracking-tight text-foreground">
+      <Card className="card-premium h-full flex flex-col overflow-hidden relative group border-slate-200">
+        <CardHeader className="flex-row items-start justify-between pb-2 space-y-0">
+          <div>
+            <CardTitle className="text-xl font-bold tracking-tight text-slate-900">
               {subject.name}
             </CardTitle>
             {subject.teacher && (
-              <CardDescription className="flex items-center pt-1 font-medium italic">
+              <CardDescription className="flex items-center pt-1 text-slate-500 font-medium">
                 <User className="mr-1.5 h-3 w-3" />
                 {subject.teacher}
               </CardDescription>
@@ -118,32 +116,31 @@ export function SubjectCard({
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 rounded-xl hover:bg-white/20 transition-colors">
-                <MoreVertical className="h-5 w-5" />
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-slate-100 transition-colors">
+                <MoreVertical className="h-4 w-4 text-slate-400" />
                 <span className="sr-only">More options</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="glass-3d border-white/20 rounded-2xl">
-              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="rounded-xl">
+            <DropdownMenuContent align="end" className="rounded-xl shadow-xl border-slate-200 p-1">
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)} className="rounded-lg cursor-pointer">
                 <Edit className="mr-2 h-4 w-4" />
                 <span>Edit</span>
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-destructive focus:text-destructive rounded-xl"
+                className="text-destructive focus:text-destructive rounded-lg cursor-pointer"
               >
-                < Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 <span>Delete</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </CardHeader>
-        <CardContent className="flex-grow space-y-8 pt-4 translate-z-20">
-          <div className="text-center relative">
-            <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 -z-10 animate-pulse" />
+        <CardContent className="flex-grow space-y-6 pt-4">
+          <div className="text-center">
             <p
               className={cn(
-                'text-6xl font-black tracking-tighter drop-shadow-2xl',
+                'text-5xl font-extrabold tracking-tighter',
                 {
                   'text-primary': status === 'safe',
                   'text-yellow-600': status === 'borderline',
@@ -152,23 +149,23 @@ export function SubjectCard({
               )}
             >
               {percentage.toFixed(0)}
-              <span className="text-3xl ml-0.5">%</span>
+              <span className="text-2xl ml-0.5">%</span>
             </p>
-            <p className="text-sm font-bold text-muted-foreground uppercase tracking-widest mt-1">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mt-1">
               {subject.present} / {total} Lectures
             </p>
           </div>
-          <div className="space-y-3">
-            <div className="h-3 w-full bg-slate-200/50 rounded-full overflow-hidden border border-white/20">
+          <div className="space-y-2">
+            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50">
               <div 
-                className={cn('h-full transition-all duration-1000 ease-out rounded-full', progressColor)} 
+                className={cn('h-full transition-all duration-700 ease-in-out rounded-full', progressColor)} 
                 style={{ width: `${percentage}%` }}
               />
             </div>
-            <div className="flex justify-between text-[10px] font-black text-muted-foreground/60 uppercase tracking-tighter">
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-tight">
               <span>0%</span>
-              <div className="flex items-center bg-white/30 px-2 py-0.5 rounded-full border border-white/40">
-                <TrendingUp className="mr-1 h-3 w-3" />
+              <div className="flex items-center gap-1 px-2 py-0.5 bg-slate-50 rounded-full border border-slate-100">
+                <TrendingUp className="h-3 w-3" />
                 <span>Goal: {subject.requirement}%</span>
               </div>
               <span>100%</span>
@@ -178,24 +175,24 @@ export function SubjectCard({
             <Button
               variant="outline"
               onClick={() => onAbsent(subject.id)}
-              className="h-14 rounded-2xl glass-3d border-white/40 hover:bg-destructive/10 text-destructive font-bold transition-all active:scale-95 shadow-lg"
+              className="h-11 rounded-xl border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-semibold shadow-sm"
             >
-              <Minus className="mr-2 h-5 w-5" /> Absent
+              <Minus className="mr-2 h-4 w-4" /> Absent
             </Button>
             <Button
               onClick={() => onPresent(subject.id)}
-              className="h-14 rounded-2xl bg-primary text-primary-foreground font-bold shadow-3d-primary hover:scale-[1.02] transition-all active:scale-95 border-t border-white/20"
+              className="h-11 rounded-xl shadow-sm hover:shadow-md transition-all font-semibold bg-primary hover:bg-primary/90"
             >
-              <Plus className="mr-2 h-5 w-5" /> Present
+              <Plus className="mr-2 h-4 w-4" /> Present
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex-col items-start gap-4 pt-4 border-t border-white/10 bg-white/5 backdrop-blur-sm">
+        <CardFooter className="flex-col items-start gap-4 pt-4 border-t border-slate-50 bg-slate-50/30">
           <MissableClassesInfo subject={subject} />
           <div className="flex w-full items-center justify-between">
             {subject.lastUpdated ? (
-              <p className="text-[10px] font-bold text-muted-foreground italic">
-                ⏱ {formatDistanceToNow(new Date(subject.lastUpdated), {
+              <p className="text-[10px] font-medium text-slate-400 italic">
+                Last updated {formatDistanceToNow(new Date(subject.lastUpdated), {
                   addSuffix: true,
                 })}
               </p>
@@ -205,11 +202,11 @@ export function SubjectCard({
             <Button
               variant="link"
               size="sm"
-              className="h-auto p-0 text-[10px] font-black uppercase tracking-tighter hover:text-primary transition-colors"
+              className="h-auto p-0 text-[10px] font-bold text-primary hover:text-primary-foreground/80 transition-colors uppercase tracking-wider"
               onClick={() => setIsReportDialogOpen(true)}
             >
-              <FileText className="mr-1 h-3 w-3" />
-              Full History
+              <FileText className="mr-1.5 h-3.5 w-3.5" />
+              Detailed Report
             </Button>
           </div>
         </CardFooter>
@@ -247,7 +244,7 @@ export function SubjectCard({
         isOpen={isReportDialogOpen}
         setIsOpen={setIsReportDialogOpen}
         subject={subject}
-        onUpdateAttendanceStatus={onUpdateAttendanceStatus}
+        onUpdateAttendanceStatus={onStatusUpdate}
       />
     </>
   );
