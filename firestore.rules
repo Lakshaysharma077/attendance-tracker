@@ -70,39 +70,17 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow update: if isExistingOwner(userId);
       allow delete: if false;
-    }
 
-    /**
-     * @description Rules for a user's private 'subjects' collection.
-     * @path        /users/{userId}/subjects
-     */
-    match /users/{userId}/subjects {
-      allow list, create: if isOwner(userId);
-    }
+      match /subjects/{subjectId} {
+        allow list, create: if isOwner(userId);
+        allow get: if isOwner(userId);
+        allow update, delete: if isExistingOwner(userId);
 
-    /**
-     * @description Rules for a user's private 'subjects' documents.
-     * @path        /users/{userId}/subjects/{subjectId}
-     */
-    match /users/{userId}/subjects/{subjectId} {
-      allow get: if isOwner(userId);
-      allow update, delete: if isExistingOwner(userId);
-    }
-
-    /**
-     * @description Rules for a subject's 'attendance' subcollection.
-     * @path        /users/{userId}/subjects/{subjectId}/attendance
-     */
-    match /users/{userId}/subjects/{subjectId}/attendance {
-      allow list, create: if isOwner(userId);
-    }
-
-    /**
-     * @description Rules for individual 'attendance' documents.
-     * @path        /users/{userId}/subjects/{subjectId}/attendance/{attendanceId}
-     */
-    match /users/{userId}/subjects/{subjectId}/attendance/{attendanceId} {
-      allow get, update, delete: if isOwner(userId);
+        match /attendance/{attendanceId} {
+          allow list, create: if isOwner(userId);
+          allow get, update, delete: if isOwner(userId);
+        }
+      }
     }
   }
 }
