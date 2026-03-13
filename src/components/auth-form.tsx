@@ -84,9 +84,32 @@ export function AuthForm() {
 
   const handleAuthError = (error: any) => {
     let errorMessage = error.message;
-    if (error.code === 'auth/configuration-not-found') {
-      errorMessage =
-        'The sign-in provider is not enabled in your Firebase project. Please contact support.';
+    switch (error.code) {
+      case 'auth/configuration-not-found':
+        errorMessage =
+          'The sign-in provider is not enabled in your Firebase project. Please enable it in the Firebase Console.';
+        break;
+      case 'auth/unauthorized-domain':
+        errorMessage =
+          'This domain is not authorized for sign-in. Please add it to the authorized domains in Firebase Console → Authentication → Settings → Authorized domains.';
+        break;
+      case 'auth/popup-blocked':
+        errorMessage =
+          'The sign-in popup was blocked by your browser. Please allow popups for this site.';
+        break;
+      case 'auth/popup-closed-by-user':
+        errorMessage = 'Sign-in was cancelled.';
+        break;
+      case 'auth/invalid-credential':
+      case 'auth/invalid-login-credentials':
+        errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+        break;
+      case 'auth/email-already-in-use':
+        errorMessage = 'An account with this email already exists. Try signing in instead.';
+        break;
+      case 'auth/weak-password':
+        errorMessage = 'Password should be at least 6 characters.';
+        break;
     }
     toast({
       variant: 'destructive',
