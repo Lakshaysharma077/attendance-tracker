@@ -3,7 +3,7 @@
 import { firebaseConfig } from '@/firebase/config';
 import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore'
+import { initializeFirestore, getFirestore, Firestore, FirestoreSettings } from 'firebase/firestore'
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
@@ -16,10 +16,9 @@ export function initializeFirebase() {
     try {
       // Attempt to initialize via Firebase App Hosting environment variables
       firebaseApp = initializeApp();
-    } catch (e) {
-      // Only warn in production because it's normal to use the firebaseConfig to initialize
-      // during development
-      if (process.env.NODE_ENV === "production") {
+    } catch (e: any) {
+      // Only warn in production if it's NOT the expected error when running outside of Firebase App Hosting
+      if (process.env.NODE_ENV === "production" && !e?.message?.includes('app/no-options')) {
         console.warn('Automatic initialization failed. Falling back to firebase config object.', e);
       }
       firebaseApp = initializeApp(firebaseConfig);
@@ -33,10 +32,15 @@ export function initializeFirebase() {
 }
 
 export function getSdks(firebaseApp: FirebaseApp) {
+  // Use initializeFirestore with settings to handle network issues in some environments
+  const firestore = initializeFirestore(firebaseApp, {
+    experimentalForceLongPolling: true,
+  } as FirestoreSettings);
+
   return {
     firebaseApp,
     auth: getAuth(firebaseApp),
-    firestore: getFirestore(firebaseApp)
+    firestore: firestore
   };
 }
 

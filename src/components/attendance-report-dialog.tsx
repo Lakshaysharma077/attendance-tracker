@@ -67,7 +67,10 @@ export function AttendanceReportDialog({
 }: AttendanceReportDialogProps) {
   const { user } = useUser();
   const { toast } = useToast();
-  const { records, isLoading } = useAttendanceHistory(user?.uid, subject.id);
+  const { records, isLoading } = useAttendanceHistory(
+    isOpen ? user?.uid : undefined,
+    isOpen ? subject.id : undefined
+  );
   const [confirmation, setConfirmation] = useState<ConfirmationState>({
     isOpen: false,
     record: null,
@@ -147,12 +150,12 @@ export function AttendanceReportDialog({
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
+                        <DropdownMenu modal={false}>
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-8 w-8 focus-visible:ring-0"
                             >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>

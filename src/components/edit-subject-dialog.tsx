@@ -62,27 +62,23 @@ export function EditSubjectDialog({
     },
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      form.reset({
-        name: subject.name,
-        teacher: subject.teacher,
-        totalClasses: subject.totalClasses,
-        requirement: subject.requirement,
-        present: subject.present,
-        absent: subject.absent,
-      });
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      // Close dialog first to avoid backdrop getting stuck during parent re-renders
+      setIsOpen(false);
+      
+      // Small delay ensures Radix finishes cleanup before dashboard re-renders with new data
+      setTimeout(async () => {
+        await onUpdateSubject({
+          ...subject,
+          ...values,
+          teacher: values.teacher || '',
+        });
+      }, 50);
+    } catch (error) {
+       console.error("Failed to update subject:", error);
     }
-  }, [isOpen, subject, form]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    onUpdateSubject({
-      ...subject,
-      ...values,
-      teacher: values.teacher || '',
-    });
-    setIsOpen(false);
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -179,7 +175,9 @@ export function EditSubjectDialog({
               />
             </div>
             <DialogFooter>
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Saving...' : 'Save Changes'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

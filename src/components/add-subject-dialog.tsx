@@ -57,16 +57,23 @@ export function AddSubjectDialog({
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    onAddSubject({
-      name: values.name,
-      teacher: values.teacher || '',
-      requirement: values.requirement,
-      totalClasses: values.totalClasses,
-    });
-    form.reset();
-    setIsOpen(false);
-  }
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      setIsOpen(false);
+      
+      setTimeout(async () => {
+        await onAddSubject({
+          name: values.name,
+          teacher: values.teacher || '',
+          requirement: values.requirement,
+          totalClasses: values.totalClasses,
+        });
+        form.reset();
+      }, 50);
+    } catch (error) {
+       console.error("Failed to add subject:", error);
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -135,7 +142,9 @@ export function AddSubjectDialog({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Add Subject</Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Adding...' : 'Add Subject'}
+              </Button>
             </DialogFooter>
           </form>
         </Form>

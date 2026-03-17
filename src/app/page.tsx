@@ -1,15 +1,29 @@
 'use client';
 
+import { useState, useCallback, useEffect } from 'react';
 import { useSubjects } from '@/hooks/use-subjects';
 import { AppHeader } from '@/components/app-header';
 import { SubjectCard } from '@/components/subject-card';
 import { Button } from '@/components/ui/button';
 import { AddSubjectDialog } from '@/components/add-subject-dialog';
-import { useState } from 'react';
-import { BookOpen, CheckCircle2, LayoutDashboard, LineChart, ShieldCheck, Plus } from 'lucide-react';
+import { EditSubjectDialog } from '@/components/edit-subject-dialog';
+import { AttendanceReportDialog } from '@/components/attendance-report-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { BookOpen, CheckCircle2, LayoutDashboard, LineChart, Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/firebase';
 import Link from 'next/link';
+import { Subject } from '@/lib/types';
+import { useToast } from '@/hooks/use-toast';
 
 function Dashboard({ user }: { user: any }) {
   const {
@@ -22,7 +36,67 @@ function Dashboard({ user }: { user: any }) {
     updateAttendanceStatus,
     isLoaded,
   } = useSubjects(user?.uid);
+  const { toast } = useToast();
+
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [activeSubject, setActiveSubject] = useState<Subject | null>(null);
+  const [activeAction, setActiveAction] = useState<'edit' | 'delete' | 'report' | null>(null);
+
+  // 👇 NUCLEAR GHOST FREEZE FIX: Har tarah ka body lock hatane aala jugaad
+  useEffect(() => {
+    if (!activeAction && !isAddDialogOpen) {
+      const removeLocks = () => {
+        document.body.style.pointerEvents = '';
+        document.body.style.overflow = '';
+        document.body.removeAttribute('data-scroll-locked');
+      };
+
+      // Turant hatao
+      removeLocks();
+
+      // Animation ke baad double-check karke pakka hatao (Radix UI thoda time leta h)
+      const timer1 = setTimeout(removeLocks, 150);
+      const timer2 = setTimeout(removeLocks, 500);
+      const timer3 = setTimeout(removeLocks, 1000);
+
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+      };
+    }
+  }, [activeAction, isAddDialogOpen]);
+
+  // 300ms ka delay taaki dropdown animation khatam ho sake
+  const openEdit = (sub: Subject) => {
+    setActiveSubject(sub);
+    setTimeout(() => setActiveAction('edit'), 300);
+  };
+
+  const openDelete = (sub: Subject) => {
+    setActiveSubject(sub);
+    setTimeout(() => setActiveAction('delete'), 300);
+  };
+
+  const openReport = (sub: Subject) => {
+    setActiveSubject(sub);
+    setTimeout(() => setActiveAction('report'), 300);
+  };
+
+  const clearActive = useCallback(() => {
+    setActiveAction(null);
+  }, []);
+
+  const handleDeleteConfirm = () => {
+    if (activeSubject) {
+      deleteSubject(activeSubject.id);
+      toast({
+        title: 'Subject Deleted',
+        description: `"${activeSubject.name}" has been removed.`,
+      });
+      clearActive();
+    }
+  };
 
   return (
     <>
@@ -31,14 +105,60 @@ function Dashboard({ user }: { user: any }) {
         setIsOpen={setIsAddDialogOpen}
         onAddSubject={addSubject}
       />
+
+      {/* Edit Dialog */}
+      {activeSubject && (
+        <EditSubjectDialog
+          isOpen={activeAction === 'edit'}
+          setIsOpen={(open) => !open && clearActive()}
+          subject={activeSubject}
+          onUpdateSubject={updateSubject}
+        />
+      )}
+
+      {/* Report Dialog */}
+      {activeSubject && (
+        <AttendanceReportDialog
+          isOpen={activeAction === 'report'}
+          setIsOpen={(open) => !open && clearActive()}
+          subject={activeSubject}
+          onUpdateAttendanceStatus={(attendanceId, oldStatus) =>
+            activeSubject && updateAttendanceStatus(activeSubject.id, attendanceId, oldStatus as 'present' | 'absent')
+          }
+        />
+      )}
+
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={activeAction === 'delete'}
+        onOpenChange={(open) => !open && clearActive()}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the subject "{activeSubject?.name}" and all
+              its attendance data. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="min-h-screen bg-white flex flex-col">
         <AppHeader onAddSubject={() => setIsAddDialogOpen(true)} />
         <main className="container mx-auto px-6 py-8 flex-grow max-w-6xl">
           {!isLoaded ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Skeleton className="h-64 w-full rounded-xl" />
-              <Skeleton className="h-64 w-full rounded-xl" />
-              <Skeleton className="h-64 w-full rounded-xl" />
+              {[1, 2, 3].map(i => <Skeleton key={i} className="h-64 w-full rounded-xl" />)}
             </div>
           ) : subjects.length > 0 ? (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -46,11 +166,11 @@ function Dashboard({ user }: { user: any }) {
                 <SubjectCard
                   key={subject.id}
                   subject={subject}
-                  onUpdate={updateSubject}
-                  onDelete={deleteSubject}
+                  onEdit={() => openEdit(subject)}
+                  onDelete={() => openDelete(subject)}
+                  onReport={() => openReport(subject)}
                   onPresent={() => handlePresent(subject.id)}
                   onAbsent={() => handleAbsent(subject.id)}
-                  onStatusUpdate={(attendanceId, oldStatus) => updateAttendanceStatus(subject.id, attendanceId, oldStatus as 'present' | 'absent')}
                 />
               ))}
             </div>
@@ -131,20 +251,20 @@ function LandingPage() {
         <div className="container mx-auto px-6 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { 
-                icon: <LayoutDashboard className="h-6 w-6" />, 
-                title: "Dashboard", 
-                desc: "Clear visualization of your attendance across all subjects." 
+              {
+                icon: <LayoutDashboard className="h-6 w-6" />,
+                title: "Dashboard",
+                desc: "Clear visualization of your attendance across all subjects."
               },
-              { 
-                icon: <LineChart className="h-6 w-6" />, 
-                title: "Compliance Math", 
-                desc: "Calculates exactly how many sessions you must attend." 
+              {
+                icon: <LineChart className="h-6 w-6" />,
+                title: "Compliance Math",
+                desc: "Calculates exactly how many sessions you must attend."
               },
-              { 
-                icon: <CheckCircle2 className="h-6 w-6" />, 
-                title: "Cloud Sync", 
-                desc: "Your data is always available and synced across all your devices." 
+              {
+                icon: <CheckCircle2 className="h-6 w-6" />,
+                title: "Cloud Sync",
+                desc: "Your data is always available and synced across all your devices."
               }
             ].map((feature, i) => (
               <div key={i} className="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm">

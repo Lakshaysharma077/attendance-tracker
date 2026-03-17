@@ -30,7 +30,7 @@ export function useSubjects(userId?: string) {
   } = useCollection<Subject>(subjectsCollection);
 
   const addSubject = useCallback(
-    (subject: Omit<Subject, 'id' | 'present' | 'absent'>) => {
+    async (subject: Omit<Subject, 'id' | 'present' | 'absent'>) => {
       if (!subjectsCollection) return;
       const newSubject = {
         ...subject,
@@ -38,34 +38,40 @@ export function useSubjects(userId?: string) {
         absent: 0,
         lastUpdated: new Date().toISOString(),
       };
-      addDoc(subjectsCollection, newSubject).catch(async () => {
+      try {
+        await addDoc(subjectsCollection, newSubject);
+      } catch (err) {
         const permissionError = new FirestorePermissionError({
           path: subjectsCollection.path,
           operation: 'create',
           requestResourceData: newSubject,
         });
         errorEmitter.emit('permission-error', permissionError);
-      });
+        throw err;
+      }
     },
     [subjectsCollection]
   );
 
   const updateSubject = useCallback(
-    (updatedSubject: Subject) => {
+    async (updatedSubject: Subject) => {
       if (!firestore || !userId) return;
       const { id, ...data } = updatedSubject;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
-      updateDoc(subjectRef, {
-        ...data,
-        lastUpdated: new Date().toISOString(),
-      }).catch(async () => {
+      try {
+        await updateDoc(subjectRef, {
+          ...data,
+          lastUpdated: new Date().toISOString(),
+        });
+      } catch (err) {
         const permissionError = new FirestorePermissionError({
           path: subjectRef.path,
           operation: 'update',
           requestResourceData: data,
         });
         errorEmitter.emit('permission-error', permissionError);
-      });
+        throw err;
+      }
     },
     [firestore, userId]
   );
@@ -86,7 +92,7 @@ export function useSubjects(userId?: string) {
   );
 
   const handlePresent = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
       const attendanceCollectionRef = collection(subjectRef, 'attendance');
@@ -106,7 +112,9 @@ export function useSubjects(userId?: string) {
       };
       batch.update(subjectRef, subjectUpdates);
 
-      batch.commit().catch(async () => {
+      try {
+        await batch.commit();
+      } catch (err) {
         errorEmitter.emit(
           'permission-error',
           new FirestorePermissionError({
@@ -123,13 +131,14 @@ export function useSubjects(userId?: string) {
             requestResourceData: { present: 'increment(1)' },
           })
         );
-      });
+        throw err;
+      }
     },
     [firestore, userId]
   );
 
   const handleAbsent = useCallback(
-    (id: string) => {
+    async (id: string) => {
       if (!firestore || !userId) return;
       const subjectRef = doc(firestore, 'users', userId, 'subjects', id);
       const attendanceCollectionRef = collection(subjectRef, 'attendance');
@@ -149,7 +158,9 @@ export function useSubjects(userId?: string) {
       };
       batch.update(subjectRef, subjectUpdates);
 
-      batch.commit().catch(async () => {
+      try {
+        await batch.commit();
+      } catch (err) {
         errorEmitter.emit(
           'permission-error',
           new FirestorePermissionError({
@@ -166,13 +177,14 @@ export function useSubjects(userId?: string) {
             requestResourceData: { absent: 'increment(1)' },
           })
         );
-      });
+        throw err;
+      }
     },
     [firestore, userId]
   );
 
   const updateAttendanceStatus = useCallback(
-    (
+    async (
       subjectId: string,
       attendanceId: string,
       oldStatus: 'present' | 'absent'
@@ -196,7 +208,9 @@ export function useSubjects(userId?: string) {
       };
       batch.update(subjectRef, subjectUpdates);
 
-      batch.commit().catch(async () => {
+      try {
+        await batch.commit();
+      } catch (err) {
         errorEmitter.emit(
           'permission-error',
           new FirestorePermissionError({
@@ -216,7 +230,8 @@ export function useSubjects(userId?: string) {
             },
           })
         );
-      });
+        throw err;
+      }
     },
     [firestore, userId]
   );
