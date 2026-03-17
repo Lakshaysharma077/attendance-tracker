@@ -17,6 +17,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
 import { MissableClassesInfo } from './missable-classes-info';
 import {
@@ -77,35 +78,37 @@ export function SubjectCard({
             </CardDescription>
           )}
         </div>
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-md hover:bg-slate-100 transition-colors">
               <MoreVertical className="h-4 w-4 text-slate-400" />
               <span className="sr-only">More options</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="rounded-lg shadow-md border-slate-200 p-1">
-            <DropdownMenuItem 
-              onSelect={(e) => {
-                e.preventDefault();
-                onEdit();
-              }} 
-              className="rounded-md cursor-pointer"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              <span>Edit</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={(e) => {
-                e.preventDefault();
-                onDelete();
-              }}
-              className="text-destructive focus:text-destructive rounded-md cursor-pointer"
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
+          <DropdownMenuPortal>
+            <DropdownMenuContent align="end" className="rounded-xl shadow-xl border border-slate-100 bg-white p-2 animate-in fade-in-0 zoom-in-95">
+              <DropdownMenuItem 
+                onSelect={(e) => {
+                  e.preventDefault();
+                  onEdit();
+                }} 
+                className="rounded-md cursor-pointer"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                <span>Edit</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  onDelete();
+                }}
+                className="text-destructive focus:text-destructive rounded-md cursor-pointer"
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenuPortal>
         </DropdownMenu>
       </CardHeader>
       <CardContent className="flex-grow space-y-5 pt-2">

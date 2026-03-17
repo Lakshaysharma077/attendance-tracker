@@ -1,10 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Plus, LogOut } from 'lucide-react';
-import { useAuth, useUser } from '@/firebase';
-import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +8,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
 } from '@/components/ui/dropdown-menu';
+import { LogOut, User } from 'lucide-react';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from './ui/skeleton';
 
-type AppHeaderProps = {
-  onAddSubject: () => void;
-};
-
-export function AppHeader({ onAddSubject }: AppHeaderProps) {
+export function AppHeader({ onAddSubject }: { onAddSubject: () => void }) {
   const auth = useAuth();
   const { user, isLoading } = useUser();
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    if (auth) {
-      await signOut(auth);
-      router.push('/login');
-    }
+  const handleLogout = async () => {
+    // 1. ZABARDASTI LOCK HATAO (Safety Guard for scroll issues)
+    document.body.style.pointerEvents = 'auto';
+    document.body.style.overflow = 'auto';
+    document.body.style.position = 'static';
+    document.documentElement.style.overflow = 'auto';
+    document.body.removeAttribute('data-scroll-locked');
+
+    // 2. Thoda ruk k logout karo taaki dropdown close hone ka time mile
+    setTimeout(async () => {
+      try {
+        if (auth) {
+          await signOut(auth);
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }, 150);
   };
 
   const getInitials = (email: string | null | undefined) => {
@@ -38,60 +49,73 @@ export function AppHeader({ onAddSubject }: AppHeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-slate-100 transition-all duration-300">
-      <div className="container mx-auto px-6 max-w-6xl">
-        <div className="flex h-14 items-center justify-between">
-          <div className="text-xl font-bold tracking-tight text-slate-900">
-            ClassTrack
-          </div>
-          <div className="flex items-center gap-4">
-            {user && (
-              <Button 
-                size="sm" 
-                onClick={onAddSubject}
-                className="rounded-lg h-9 px-4 font-bold bg-slate-900 hover:bg-slate-800 text-white transition-colors"
-              >
-                Add Subject
-              </Button>
-            )}
-            {isLoading ? (
-              <Skeleton className="h-8 w-8 rounded-full" />
-            ) : user && auth ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-8 w-8 rounded-full border border-slate-100 hover:bg-slate-50 transition-colors p-0 overflow-hidden"
-                  >
-                    <Avatar className="h-full w-full">
-                      <AvatarImage
-                        src={user.photoURL ?? ''}
-                        alt={user.displayName ?? ''}
-                      />
-                      <AvatarFallback className="text-[10px] font-bold bg-slate-50 text-slate-400">{getInitials(user.email)}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56 bg-white border border-slate-100 rounded-xl p-1 shadow-md mt-2" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal p-3">
-                    <div className="flex flex-col space-y-0.5">
-                      <p className="text-xs font-bold text-slate-900 leading-none">
+    <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/80 backdrop-blur-xl">
+      <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-6xl">
+        <div className="text-xl font-black tracking-tighter text-slate-900">
+          ClassTrack
+        </div>
+
+        <div className="flex items-center gap-4">
+          {user && (
+            <Button
+              onClick={onAddSubject}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg h-10 px-6"
+            >
+              Add Subject
+            </Button>
+          )}
+
+          {isLoading ? (
+            <Skeleton className="h-10 w-10 rounded-full" />
+          ) : user && auth ? (
+            <DropdownMenu modal={false}>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-10 w-10 rounded-full border border-slate-100 hover:bg-slate-50 transition-colors p-0 overflow-hidden"
+                >
+                  <Avatar className="h-full w-full">
+                    <AvatarImage
+                      src={user.photoURL ?? ''}
+                      alt={user.displayName ?? ''}
+                    />
+                    <AvatarFallback className="text-xs font-bold bg-slate-50 text-slate-400">
+                      {getInitials(user.email)}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 p-2 rounded-xl border border-slate-100 bg-white shadow-xl mt-2 animate-in fade-in-0 zoom-in-95"
+                >
+                  <DropdownMenuLabel className="font-normal p-2">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-bold leading-none text-slate-900">
                         {user.displayName || 'User'}
                       </p>
-                      <p className="text-[10px] text-slate-400 font-medium truncate">
+                      <p className="text-xs font-medium leading-none text-slate-500 truncate">
                         {user.email}
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-50" />
-                  <DropdownMenuItem onClick={handleSignOut} className="rounded-lg m-1 focus:bg-destructive/5 focus:text-destructive text-slate-600 cursor-pointer text-xs font-medium">
-                    <LogOut className="mr-2 h-3.5 w-3.5" />
+                  <DropdownMenuSeparator className="my-2 bg-slate-100" />
+
+                  <DropdownMenuItem
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      handleLogout();
+                    }}
+                    className="text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer font-bold rounded-lg p-2.5"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
                     <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
-          </div>
+              </DropdownMenuPortal>
+            </DropdownMenu>
+          ) : null}
         </div>
       </div>
     </header>

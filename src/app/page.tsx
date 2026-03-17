@@ -44,26 +44,21 @@ function Dashboard({ user }: { user: any }) {
 
   // 👇 NUCLEAR GHOST FREEZE FIX: Har tarah ka body lock hatane aala jugaad
   useEffect(() => {
-    if (!activeAction && !isAddDialogOpen) {
-      const removeLocks = () => {
-        document.body.style.pointerEvents = '';
-        document.body.style.overflow = '';
+    // Ye hamesha run hoga taaki koi bhi accidental lock hat sake
+    const removeLocks = () => {
+      if (typeof document !== 'undefined') {
+        document.body.style.pointerEvents = 'auto';
+        document.body.style.overflow = 'auto';
+        document.body.style.position = 'static';
+        document.documentElement.style.overflow = 'auto';
         document.body.removeAttribute('data-scroll-locked');
-      };
+      }
+    };
 
-      // Turant hatao
+    if (!activeAction && !isAddDialogOpen) {
       removeLocks();
-
-      // Animation ke baad double-check karke pakka hatao (Radix UI thoda time leta h)
-      const timer1 = setTimeout(removeLocks, 150);
-      const timer2 = setTimeout(removeLocks, 500);
-      const timer3 = setTimeout(removeLocks, 1000);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
-      };
+      const timer = setTimeout(removeLocks, 300);
+      return () => clearTimeout(timer);
     }
   }, [activeAction, isAddDialogOpen]);
 
@@ -153,7 +148,7 @@ function Dashboard({ user }: { user: any }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="min-h-screen bg-white flex flex-col">
+      <div className="bg-white flex flex-col">
         <AppHeader onAddSubject={() => setIsAddDialogOpen(true)} />
         <main className="container mx-auto px-6 py-8 flex-grow max-w-6xl">
           {!isLoaded ? (
