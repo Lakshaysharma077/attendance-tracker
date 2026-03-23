@@ -18,7 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { BookOpen, CheckCircle2, LayoutDashboard, LineChart, Plus } from 'lucide-react';
+import { ArrowRight, BookOpen, CheckCircle2, LayoutDashboard, LineChart, Plus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useUser } from '@/firebase';
 import Link from 'next/link';
@@ -197,7 +197,11 @@ function Dashboard({ user }: { user: any }) {
   );
 }
 
+import { blogPosts } from '@/lib/blog-data';
+
 function LandingPage() {
+  const latestPosts = blogPosts.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -207,6 +211,7 @@ function LandingPage() {
         </div>
         <div className="hidden lg:flex items-center gap-8">
           <Link href="/about" className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">About</Link>
+          <Link href="/blog" className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Blog</Link>
           <Link href="/contact" className="text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest">Contact</Link>
         </div>
         <div className="flex items-center gap-3">
@@ -221,15 +226,19 @@ function LandingPage() {
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 pt-20 pb-24 text-center max-w-4xl">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider mb-8">
+          <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+          Trusted by 10,000+ Students
+        </div>
         <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 leading-[1.1] mb-8">
-          Simple Attendance <br /> <span className="text-slate-500">for Modern Students.</span>
+          Take Control of Your Degree. <br /> <span className="text-slate-400 font-medium">Never Miss a Goal.</span>
         </h1>
-        <p className="text-lg md:text-xl text-slate-500 max-w-xl mx-auto mb-12 font-medium">
-          The cleanest way to monitor your academic presence. Stay compliant, stay focused.
+        <p className="text-lg md:text-xl text-slate-500 max-w-2xl mx-auto mb-12 font-medium leading-relaxed">
+          The ultimate attendance and productivity tracker built specifically for students who want to balance life, studies, and success.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/login">
-            <Button size="lg" className="h-14 px-10 text-base font-bold rounded-xl bg-slate-900 hover:bg-slate-800 text-white">
+            <Button size="lg" className="h-14 px-10 text-base font-bold rounded-xl bg-slate-900 hover:bg-slate-800 text-white shadow-xl shadow-slate-900/10">
               Start Tracking Free
             </Button>
           </Link>
@@ -241,28 +250,76 @@ function LandingPage() {
         </div>
       </section>
 
-      {/* Features */}
-      <section className="bg-slate-50 py-24 border-y border-slate-100">
+      {/* The Problem Section */}
+      <section className="py-24 border-y border-slate-100 bg-slate-50/50">
         <div className="container mx-auto px-6 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div>
+              <h2 className="text-3xl font-black tracking-tight text-slate-900 mb-6">The "Attendance Math" Burnout.</h2>
+              <p className="text-slate-600 font-medium leading-relaxed mb-6">
+                Most students fail not because they aren't smart, but because they lose track of the details. You start the semester strong, but by week six, you're guessing how many classes you’ve missed. 
+              </p>
+              <div className="space-y-4">
+                {[
+                  "Mental math is unreliable and stressful.",
+                  "Manual tracking is tedious and easily forgotten.",
+                  "Anxiety of 'Did I miss too many?' is a distraction."
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <div className="h-5 w-5 rounded-full bg-red-50 flex items-center justify-center border border-red-100">
+                      <div className="h-2 w-2 rounded-full bg-red-400"></div>
+                    </div>
+                    <span className="text-sm font-bold text-slate-700">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-white p-10 rounded-3xl border border-slate-200 shadow-sm relative">
+              <h3 className="text-xl font-bold mb-4">The Solution.</h3>
+              <p className="text-slate-500 text-sm font-medium leading-relaxed mb-8">
+                ClassTrack provides a real-time dashboard that calculates your compliance automatically.
+              </p>
+              <div className="space-y-6">
+                <div className="h-8 w-full bg-slate-100 rounded-lg animate-pulse"></div>
+                <div className="h-8 w-2/3 bg-slate-100 rounded-lg animate-pulse"></div>
+                <div className="h-4 w-1/3 bg-slate-900/5 rounded-lg"></div>
+              </div>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                <div className="bg-slate-900 text-white p-4 rounded-xl font-bold text-xs shadow-2xl">
+                  ClassTrack: Verified
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="py-24">
+        <div className="container mx-auto px-6 max-w-6xl">
+          <div className="text-center max-w-2xl mx-auto mb-16">
+            <h2 className="text-3xl font-black tracking-tight text-slate-900 mb-4">Reclaim Your Time.</h2>
+            <p className="text-slate-500 font-medium">Tools built to foster consistency and mental clarity.</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 icon: <LayoutDashboard className="h-6 w-6" />,
-                title: "Dashboard",
-                desc: "Clear visualization of your attendance across all subjects."
+                title: "One-Tap Entry",
+                desc: "Mark attendance in seconds. Optimized for the walk between lectures."
               },
               {
                 icon: <LineChart className="h-6 w-6" />,
-                title: "Compliance Math",
-                desc: "Calculates exactly how many sessions you must attend."
+                title: "Missable Info",
+                desc: "Know exactly how many more classes you can safely miss while staying compliant."
               },
               {
                 icon: <CheckCircle2 className="h-6 w-6" />,
-                title: "Cloud Sync",
-                desc: "Your data is always available and synced across all your devices."
+                title: "Sync Anywhere",
+                desc: "Your data is always available on phone, tablet, and desktop via secure cloud sync."
               }
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm">
+              <div key={i} className="bg-white p-10 rounded-2xl border border-slate-200 shadow-sm hover:border-slate-300 transition-all">
                 <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-8">
                   {feature.icon}
                 </div>
@@ -274,22 +331,59 @@ function LandingPage() {
         </div>
       </section>
 
+      {/* Blog Preview Section */}
+      <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+        <div className="container mx-auto px-6 max-w-6xl relative z-10">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+            <div className="max-w-xl">
+              <h2 className="text-3xl font-black tracking-tight mb-4">The Student Success Hub.</h2>
+              <p className="text-slate-400 font-medium">Expert advice on attendance, time management, and academic systems.</p>
+            </div>
+            <Link href="/blog">
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 font-bold px-8 rounded-xl">View All Articles</Button>
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {latestPosts.map((post, i) => (
+              <Link href={`/blog/${post.slug}`} key={i} className="group flex flex-col h-full bg-slate-800/50 p-8 rounded-3xl border border-slate-700 hover:bg-slate-800 transition-colors">
+                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{post.category}</div>
+                <h3 className="text-lg font-bold mb-4 group-hover:text-slate-300 transition-colors">{post.title}</h3>
+                <p className="text-sm text-slate-400 font-medium leading-relaxed mb-8 flex-grow">{post.excerpt}</p>
+                <div className="flex items-center text-xs font-bold gap-2 group-hover:gap-3 transition-all">
+                  Read Article <ArrowRight className="h-3 w-3" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+        {/* Background decorations */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-slate-800 rounded-full blur-[120px] opacity-30 -mr-48 -mt-48"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-slate-800 rounded-full blur-[120px] opacity-30 -ml-48 -mb-48"></div>
+      </section>
+
       {/* FAQ Section */}
       <section className="container mx-auto py-24 px-6 max-w-3xl">
-        <h2 className="text-3xl font-bold text-center mb-12 tracking-tight text-slate-900">Common Questions</h2>
-        <div className="space-y-4">
+        <h2 className="text-3xl font-black text-center mb-16 tracking-tight text-slate-900">Common Questions</h2>
+        <div className="grid grid-cols-1 gap-4">
           {[
-            { q: "Is ClassTrack free to use?", a: "Yes, ClassTrack is a 100% free tool for students worldwide." },
-            { q: "Can I use it for multiple subjects?", a: "Absolutely. You can add as many subjects as you need." },
-            { q: "Does it work on mobile?", a: "Yes, it works flawlessly on all devices." }
+            { q: "Is ClassTrack free to use?", a: "Yes, ClassTrack is a 100% free tool for students worldwide. We sustain the site through non-intrusive ads." },
+            { q: "Can I use it for multiple subjects?", a: "Absolutely. You can add as many subjects, labs, and tutorials as you need to track." },
+            { q: "Does it work on mobile?", a: "Yes, it is fully responsive and behaves like an app when saved to your home screen." },
+            { q: "Where is my data stored?", a: "Your data is stored securely in Firebase Cloud, ensuring it's available across all your logged-in devices." }
           ].map((faq, i) => (
-            <div key={i} className="bg-white p-8 rounded-xl border border-slate-100">
-              <h3 className="text-base font-bold mb-2 text-slate-900">{faq.q}</h3>
+            <div key={i} className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+              <h3 className="text-sm font-black mb-2 text-slate-900 uppercase tracking-tight">{faq.q}</h3>
               <p className="text-slate-500 text-sm font-medium leading-relaxed">{faq.a}</p>
             </div>
           ))}
         </div>
       </section>
+
+      <footer className="border-t border-slate-100 py-12 mt-20">
+        <div className="container mx-auto px-6 max-w-6xl text-center">
+          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">© 2026 ClassTrack. All rights reserved.</div>
+        </div>
+      </footer>
     </div>
   );
 }
