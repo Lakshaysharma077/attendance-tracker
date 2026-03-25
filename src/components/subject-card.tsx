@@ -123,7 +123,7 @@ export function SubjectCard({
               }
             )}
           >
-            {percentage.toFixed(0)}
+            {percentage.toFixed(2)}
             <span className="text-xl ml-0.5 font-medium">%</span>
           </p>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
