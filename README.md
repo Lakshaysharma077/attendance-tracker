@@ -69,7 +69,7 @@ To run ClassTrack locally:
    npm run dev
    ```
 
-Open [http://localhost:9002](http://localhost:9002) to view the app.
+Open [https://class-track.live/](https://class-track.live/) to view the app.
 
 ---
 
